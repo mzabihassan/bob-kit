@@ -19,6 +19,7 @@ skills/          # one folder per skill, each with a SKILL.md entry point
   criticize-me/
   defend-me/
   confluence-documentation/
+  design-system/
   release-change-management/
   production-incident-investigation/
 modes/           # custom Bob modes (custom_modes.yaml)
@@ -41,6 +42,7 @@ modes/           # custom Bob modes (custom_modes.yaml)
 | [criticize-me](skills/criticize-me/SKILL.md) | Ruthless, logical self-critique of exactly one commit (required: SHA, `HEAD~n`, tag or commit URL). Attacks the approach, correctness, tests and the commit itself; every finding has evidence, a consequence and a confidence level; no softening, no invented problems; read-only and never posted anywhere. |
 | [defend-me](skills/defend-me/SKILL.md) | The counterpart of criticize-me: the strongest honest defence of exactly one commit (required) before a code review, CAB or architecture review. Justifies decisions with checkable evidence, anticipates objections (or answers given review comments or a criticize-me critique) as rebutted, mitigated or conceded, proposes quick fixes before review, and drafts the MR description and replies. Never invents evidence. |
 | [confluence-documentation](skills/confluence-documentation/SKILL.md) | Technical documentation in Confluence (Cloud or Data Center): ADRs, designs, runbooks, integration guides, onboarding, release and post-mortem pages, written from the real code and systems. Searches and updates existing pages before creating new ones; page properties, labels and macros; pre-publication checklist; drafts first, publishes only when asked. |
+| [design-system](skills/design-system/SKILL.md) | Extract and audit the real design system of an existing frontend (Angular, React, Vue; CSS/SCSS, Tailwind, Material, PrimeNG, MUI): palette with near-duplicate consolidation (OKLab) and roles, typography, spacing, radius, elevation, token coverage, WCAG contrast, components. Delivers a measured report, a palette preview (HTML), draft W3C DTCG tokens and a prioritised migration plan via `scripts/extract_design_tokens.py`. Read-only. |
 | [release-change-management](skills/release-change-management/SKILL.md) | Release notes (business and technical), changelog, version proposal, ITIL/ServiceNow change request with impact, risk and backout plan, deployment runbook, go/no-go and post-implementation review, built from the real change set with `scripts/release_changes.py` (git range → grouped changes, MRs, breaking changes, risky files). Prepares; never submits or tags unless asked. |
 | [production-incident-investigation](skills/production-incident-investigation/SKILL.md) | On-call support for production incidents on Java/Spring Boot, Angular/React, Kubernetes/OpenShift, Oracle/PostgreSQL and IBM Cloud: mitigate first, find what changed, test hypotheses against metrics, logs, traces and JVM/database evidence, propose safe mitigations, keep a UTC timeline, draft status updates and a blameless post-mortem. Read-only in production unless the incident commander approves. |
 
