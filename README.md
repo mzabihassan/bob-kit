@@ -11,6 +11,7 @@ skills/          # one folder per skill, each with a SKILL.md entry point
   sonarqube-java-angular/
   security-findings-remediation/
   gitlab-ci-engineer/
+  sql-database-engineer/
 modes/           # custom Bob modes (coming soon)
 ```
 
@@ -23,6 +24,7 @@ modes/           # custom Bob modes (coming soon)
 | [sonarqube-java-angular](skills/sonarqube-java-angular/SKILL.md) | Improves SonarQube results on Java/Spring Boot and Angular projects with the best impact/effort ratio: Quality Gate and real security/reliability risks first, then quick coverage wins found by `scripts/coverage_hotspots.py` (JaCoCo/LCOV ranking), safe minimal issue fixes and hotspot reviews, measured before and after. No metric gaming. |
 | [security-findings-remediation](skills/security-findings-remediation/SKILL.md) | Triage and fix Fortify (SAST), Nexus IQ (dependencies, licences) and Sysdig (images, posture, runtime) findings: release-gate blockers and exploitable issues first, mass fixes through dependency/base-image upgrades, minimal code fixes, justified waivers for the security team, and rescan evidence. Never games the scanner. |
 | [gitlab-ci-engineer](skills/gitlab-ci-engineer/SKILL.md) | Diagnose failing GitLab pipelines from the job logs and write or improve `.gitlab-ci.yml` for Java/Spring Boot, Angular/React and container projects: rules, DAG, caches, artifacts, templates/components, security stages and GitOps promotion to Argo CD. Respects central templates and governance; never bypasses gates or leaks secrets. |
+| [sql-database-engineer](skills/sql-database-engineer/SKILL.md) | Oracle and PostgreSQL for enterprise Java apps: plan-based query tuning and indexing, zero-downtime Flyway/Liquibase migrations, locking/deadlock/isolation issues, SQL and PL/SQL/PL/pgSQL, and Oracle to PostgreSQL migration with the semantic traps that silently change results. Read-only on shared databases unless asked. |
 
 ## Usage
 
