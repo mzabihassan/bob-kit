@@ -18,7 +18,7 @@ skills/          # one folder per skill, each with a SKILL.md entry point
   merge-request-review/
   release-change-management/
   production-incident-investigation/
-modes/           # custom Bob modes (coming soon)
+modes/           # custom Bob modes (custom_modes.yaml)
 ```
 
 ## Skills
@@ -37,6 +37,15 @@ modes/           # custom Bob modes (coming soon)
 | [merge-request-review](skills/merge-request-review/SKILL.md) | Technical-lead review of a GitLab MR (URL or `!id`), a commit, a range or compare URL, a tag or release range, a branch, or local uncommitted changes. Severity-ranked findings with failure scenarios and fixes, verified in an isolated worktree when useful; reuses the other skills' checklists; posts to GitLab only when asked. |
 | [release-change-management](skills/release-change-management/SKILL.md) | Release notes (business and technical), changelog, version proposal, ITIL/ServiceNow change request with impact, risk and backout plan, deployment runbook, go/no-go and post-implementation review, built from the real change set with `scripts/release_changes.py` (git range → grouped changes, MRs, breaking changes, risky files). Prepares; never submits or tags unless asked. |
 | [production-incident-investigation](skills/production-incident-investigation/SKILL.md) | On-call support for production incidents on Java/Spring Boot, Angular/React, Kubernetes/OpenShift, Oracle/PostgreSQL and IBM Cloud: mitigate first, find what changed, test hypotheses against metrics, logs, traces and JVM/database evidence, propose safe mitigations, keep a UTC timeline, draft status updates and a blameless post-mortem. Read-only in production unless the incident commander approves. |
+
+## Modes
+
+| Mode | Description |
+|------|-------------|
+| [tech-lead-reviewer](modes/README.md) | Reviews, audits and estimates without changing code; may only write review reports. |
+| [security-remediator](modes/README.md) | Fixes security scanner findings; cannot edit CI pipelines, scanner or policy configuration. |
+
+See [modes/README.md](modes/README.md) for installation and recommended approval settings.
 
 ## Usage
 
