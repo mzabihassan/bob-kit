@@ -50,6 +50,7 @@ modes/           # custom Bob modes (custom_modes.yaml)
 |------|-------------|
 | [tech-lead-reviewer](modes/README.md) | Reviews, audits and estimates without changing code; may only write review reports. |
 | [security-remediator](modes/README.md) | Fixes security scanner findings; cannot edit CI pipelines, scanner or policy configuration. |
+| [tech-writer](modes/README.md) | Writes and updates documentation and Confluence pages; may only edit documentation files and cannot run commands. |
 
 See [modes/README.md](modes/README.md) for installation and recommended approval settings.
 
