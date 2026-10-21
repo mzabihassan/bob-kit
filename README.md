@@ -18,6 +18,7 @@ skills/          # one folder per skill, each with a SKILL.md entry point
   merge-request-review/
   criticize-me/
   defend-me/
+  confluence-documentation/
   release-change-management/
   production-incident-investigation/
 modes/           # custom Bob modes (custom_modes.yaml)
@@ -39,6 +40,7 @@ modes/           # custom Bob modes (custom_modes.yaml)
 | [merge-request-review](skills/merge-request-review/SKILL.md) | Technical-lead review of a GitLab MR (URL or `!id`), a commit, a range or compare URL, a tag or release range, a branch, or local uncommitted changes. Severity-ranked findings with failure scenarios and fixes, verified in an isolated worktree when useful; reuses the other skills' checklists; posts to GitLab only when asked. |
 | [criticize-me](skills/criticize-me/SKILL.md) | Ruthless, logical self-critique of exactly one commit (required: SHA, `HEAD~n`, tag or commit URL). Attacks the approach, correctness, tests and the commit itself; every finding has evidence, a consequence and a confidence level; no softening, no invented problems; read-only and never posted anywhere. |
 | [defend-me](skills/defend-me/SKILL.md) | The counterpart of criticize-me: the strongest honest defence of exactly one commit (required) before a code review, CAB or architecture review. Justifies decisions with checkable evidence, anticipates objections (or answers given review comments or a criticize-me critique) as rebutted, mitigated or conceded, proposes quick fixes before review, and drafts the MR description and replies. Never invents evidence. |
+| [confluence-documentation](skills/confluence-documentation/SKILL.md) | Technical documentation in Confluence (Cloud or Data Center): ADRs, designs, runbooks, integration guides, onboarding, release and post-mortem pages, written from the real code and systems. Searches and updates existing pages before creating new ones; page properties, labels and macros; pre-publication checklist; drafts first, publishes only when asked. |
 | [release-change-management](skills/release-change-management/SKILL.md) | Release notes (business and technical), changelog, version proposal, ITIL/ServiceNow change request with impact, risk and backout plan, deployment runbook, go/no-go and post-implementation review, built from the real change set with `scripts/release_changes.py` (git range → grouped changes, MRs, breaking changes, risky files). Prepares; never submits or tags unless asked. |
 | [production-incident-investigation](skills/production-incident-investigation/SKILL.md) | On-call support for production incidents on Java/Spring Boot, Angular/React, Kubernetes/OpenShift, Oracle/PostgreSQL and IBM Cloud: mitigate first, find what changed, test hypotheses against metrics, logs, traces and JVM/database evidence, propose safe mitigations, keep a UTC timeline, draft status updates and a blameless post-mortem. Read-only in production unless the incident commander approves. |
 
