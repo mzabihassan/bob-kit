@@ -23,6 +23,7 @@ skills/          # un dossier par skill, chacun avec un point d'entrée SKILL.md
   release-change-management/
   production-incident-investigation/
 modes/           # modes Bob personnalisés (custom_modes.yaml)
+hooks/           # lifecycle hooks Bob (scripts Python + settings.example.json)
 ```
 
 ## Skills
@@ -56,6 +57,19 @@ modes/           # modes Bob personnalisés (custom_modes.yaml)
 
 Voir [modes/README.md](modes/README.md) pour l'installation et les réglages d'approbation recommandés.
 
+## Hooks
+
+| Hook | Description |
+|------|-------------|
+| [secret_guard](hooks/README.md) | Bloque l'écriture d'un secret dans un fichier et les prompts contenant un secret. |
+| [command_guard](hooks/README.md) | Bloque les commandes irréversibles (force push, `reset --hard`, `terraform apply`, `kubectl delete`, `DROP TABLE`…). |
+| [migration_guard](hooks/README.md) | Interdit de modifier une migration Flyway déjà mergée. |
+| [project_context](hooks/README.md) | Injecte la branche, l'état git et les versions de la pile au début de la session. |
+| [audit_log](hooks/README.md) | Journal local de chaque action de l'agent, secrets masqués. |
+| [notify_done](hooks/README.md) | Notification de bureau quand Bob a terminé. |
+
+Un hook en panne ne bloque jamais Bob. Voir [hooks/README.md](hooks/README.md) pour l'installation.
+
 ## Utilisation
 
 Copiez le dossier d'un skill dans le répertoire `.bob/skills/` de votre projet (ou dans `~/.bob/skills/` pour l'utiliser dans tous vos projets) :
@@ -63,3 +77,4 @@ Copiez le dossier d'un skill dans le répertoire `.bob/skills/` de votre projet 
 ```bash
 cp -R skills/angular2-developer /chemin/vers/le/projet/.bob/skills/
 ```
+

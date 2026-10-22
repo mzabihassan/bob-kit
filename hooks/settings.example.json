@@ -1,0 +1,37 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [{ "type": "command", "command": "python3 .bob/hooks/project_context.py", "timeout": 5 }]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [{ "type": "command", "command": "python3 .bob/hooks/secret_guard.py", "timeout": 5 }]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "^(write_file|write_to_file|apply_diff|search_and_replace|insert_content)$",
+        "hooks": [
+          { "type": "command", "command": "python3 .bob/hooks/secret_guard.py", "timeout": 5 },
+          { "type": "command", "command": "python3 .bob/hooks/migration_guard.py", "timeout": 5 }
+        ]
+      },
+      {
+        "matcher": "^execute_command$",
+        "hooks": [{ "type": "command", "command": "python3 .bob/hooks/command_guard.py", "timeout": 5 }]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [{ "type": "command", "command": "python3 .bob/hooks/audit_log.py", "timeout": 5 }]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [{ "type": "command", "command": "python3 .bob/hooks/notify_done.py", "timeout": 10 }]
+      }
+    ]
+  }
+}
