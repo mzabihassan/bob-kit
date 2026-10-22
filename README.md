@@ -24,6 +24,7 @@ skills/          # un dossier par skill, chacun avec un point d'entrée SKILL.md
   production-incident-investigation/
 modes/           # modes Bob personnalisés (custom_modes.yaml)
 hooks/           # lifecycle hooks Bob (scripts Python + settings.example.json)
+tools/           # validation du kit, tests des hooks, hook git pre-commit
 ```
 
 ## Skills
@@ -78,3 +79,12 @@ Copiez le dossier d'un skill dans le répertoire `.bob/skills/` de votre projet 
 cp -R skills/angular2-developer /chemin/vers/le/projet/.bob/skills/
 ```
 
+## Contribuer
+
+Avant chaque commit, la validation du kit et les tests des hooks tournent automatiquement si vous activez le hook git du dépôt (une fois par clone) :
+
+```bash
+git config core.hooksPath tools/git-hooks
+```
+
+Les mêmes vérifications tournent en CI à chaque push (`.github/workflows/validate.yml`). Pour les lancer à la main : `python3 tools/validate_kit.py` puis `python3 tools/test_hooks.py`.

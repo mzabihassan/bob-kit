@@ -1,0 +1,18 @@
+{
+  "tech-lead-reviewer": {
+    "allow": ["reviews/mr-123.md", "docs/reviews/2026-10-payments.md", "MR-123-REVIEW.md", "notes/CODE_REVIEW.md"],
+    "deny": ["src/main/java/App.java", "README.md", "reviews/script.sh", "pom.xml", ".gitlab-ci.yml", "docs/guide.md"]
+  },
+  "security-remediator": {
+    "allow": ["src/main/java/com/acme/PaymentController.java", "pom.xml", "package.json", "package-lock.json", "Dockerfile",
+              "frontend/src/app/auth.interceptor.ts", "backend/build.gradle.kts", "docs/security-notes.md"],
+    "deny": [".gitlab-ci.yml", "backend/.gitlab-ci.yml", ".gitlab/ci/security.yml", ".github/workflows/ci.yml", "Jenkinsfile",
+             "sonar-project.properties", "fortify/scan.sh", ".fortify/rules.xml", ".bob/custom_modes.yaml", "svc/.bob/rules/a.md"]
+  },
+  "tech-writer": {
+    "allow": ["README.md", "docs/runbook.md", "docs/adr/ADR-012-idempotency.md", "service/docs/design.adoc", "CHANGELOG.md",
+              "docs/diagrams/context.drawio", "docs/img/flow.svg", "guide.rst", "CONTRIBUTING.md", "site/index.mdx"],
+    "deny": ["src/main/java/App.java", "pom.xml", "AGENTS.md", "service/AGENTS.md", "CLAUDE.md", ".bob/rules/01.md",
+             "svc/.bob/skills/x/SKILL.md", "logo.png", "src/app/app.component.ts", "docs/build.sh", ".gitlab-ci.yml", "application.yml"]
+  }
+}

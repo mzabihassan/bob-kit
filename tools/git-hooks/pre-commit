@@ -1,0 +1,7 @@
+#!/bin/sh
+# bob-kit pre-commit: validate skills, modes and hooks, then run the hook tests.
+# Install once per clone:  git config core.hooksPath tools/git-hooks
+set -e
+ROOT="$(git rev-parse --show-toplevel)"
+python3 "$ROOT/tools/validate_kit.py"
+python3 "$ROOT/tools/test_hooks.py"
