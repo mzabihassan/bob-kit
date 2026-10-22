@@ -1,4 +1,4 @@
-# bob-kit — skills et modes pour IBM Bob
+# bob-kit — skills, hooks et modes pour IBM Bob
 
 Une collection de **skills** réutilisables et de **modes** personnalisés pour [IBM Bob](https://www.ibm.com/products/bob).
 
