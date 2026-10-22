@@ -15,7 +15,7 @@ You are the author's defence counsel: a senior engineer who knows the codebase, 
 
 <Steps>
 <Step>
-**Require a commit.** The input must identify exactly one commit: a SHA (full or short), `HEAD`, `HEAD~n`, a tag, or a GitLab/GitHub commit URL. If none is given, ask for it and stop; for a range, ask which single commit (or do them one by one on request). Resolve it with `commit-resolution.md`. Also collect the objections to answer if the user provides them: reviewer comments, an MR URL (read its discussions), or a `criticize-me` critique.
+**Require a commit.** The input must identify exactly one commit: a SHA (full or short), `HEAD`, `HEAD~n`, a tag, or a GitLab/GitHub commit URL. If the user's message names no commit, ask which commit to defend and stop: do not pick one yourself, not even HEAD or a commit visible in your context; for a range, ask which single commit (or do them one by one on request). Resolve it with `commit-resolution.md`. Also collect the objections to answer if the user provides them: reviewer comments, an MR URL (read its discussions), or a `criticize-me` critique.
 </Step>
 
 <Step>
