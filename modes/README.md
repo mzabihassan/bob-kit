@@ -1,30 +1,30 @@
-# bob-kit modes
+# Modes bob-kit
 
-Custom modes for IBM Bob, defined in [`custom_modes.yaml`](custom_modes.yaml). A mode sets Bob's role and the tool groups it may use; the bob-kit skills provide the know-how, so install the skills too.
+Des modes personnalisés pour IBM Bob, définis dans [`custom_modes.yaml`](custom_modes.yaml). Un mode fixe le rôle de Bob et les groupes d'outils qu'il peut utiliser ; le savoir-faire vient des skills bob-kit, installez-les donc aussi.
 
-| Mode | Purpose | Tool groups |
+| Mode | Rôle | Groupes d'outils |
 | --- | --- | --- |
-| 🧭 `tech-lead-reviewer` | Reviews (MR, commit, branch, tag range, local changes), audits, impact analysis and estimates, without changing code | `read`, `edit` **only for review reports** (`reviews/*.md`, `docs/reviews/*.md`, `*REVIEW*.md`), `execute`, `mcp`, `skill`, `todo`, `mode` |
-| 🛡️ `security-remediator` | Fixes Fortify, Nexus IQ, Sysdig and SonarQube security findings | `read`, `edit` **except** CI pipelines (`.gitlab-ci.yml`, `.gitlab/`, `.github/`, `Jenkinsfile`), scanner and policy configuration (`sonar-project.properties`, Fortify files) and `.bob/`, `execute`, `mcp`, `skill`, `todo` |
-| 📘 `tech-writer` | Writes and updates documentation in the repository and in Confluence (through the MCP server), without touching code | `read`, `edit` **only for documentation** (Markdown, AsciiDoc, reStructuredText, diagrams under `docs/`; never `AGENTS.md`, `CLAUDE.md` or `.bob/`), `mcp`, `skill`, `todo`, `mode`. **No `execute`**: documented commands are marked as not verified |
+| 🧭 `tech-lead-reviewer` | Revues (MR, commit, branche, plage de tags, changements locaux), audits, analyses d'impact et estimations, sans modifier le code | `read`, `edit` **uniquement pour les rapports de revue** (`reviews/*.md`, `docs/reviews/*.md`, `*REVIEW*.md`), `execute`, `mcp`, `skill`, `todo`, `mode` |
+| 🛡️ `security-remediator` | Corrige les findings de sécurité Fortify, Nexus IQ, Sysdig et SonarQube | `read`, `edit` **sauf** les pipelines CI (`.gitlab-ci.yml`, `.gitlab/`, `.github/`, `Jenkinsfile`), la configuration des scanners et des politiques (`sonar-project.properties`, fichiers Fortify) et `.bob/`, `execute`, `mcp`, `skill`, `todo` |
+| 📘 `tech-writer` | Rédige et met à jour la documentation du dépôt et de Confluence (via le serveur MCP), sans toucher au code | `read`, `edit` **uniquement pour la documentation** (Markdown, AsciiDoc, reStructuredText, diagrammes sous `docs/` ; jamais `AGENTS.md`, `CLAUDE.md` ni `.bob/`), `mcp`, `skill`, `todo`, `mode`. **Pas d'`execute`** : les commandes documentées sont marquées comme non vérifiées |
 
-Confluence access for `tech-writer` requires an Atlassian MCP server configured in Bob (the Atlassian Rovo MCP server for Cloud, or `mcp-atlassian` for Cloud or Data Center).
+L'accès à Confluence pour `tech-writer` nécessite un serveur MCP Atlassian configuré dans Bob : le serveur MCP Rovo d'Atlassian pour Cloud, ou `mcp-atlassian` pour Cloud ou Data Center.
 
-The `fileRegex` restrictions were tested with JavaScript regular expressions against allowed and denied example paths.
+Les restrictions `fileRegex` sont testées sur des chemins d'exemple autorisés et refusés (`tools/mode_regex_cases.json`, vérifiés par `tools/validate_kit.py`).
 
-## Install
+## Installation
 
-Project modes (shared with the team through git):
+Modes du projet (partagés avec l'équipe via git) :
 
 ```bash
-mkdir -p .bob && cp modes/custom_modes.yaml .bob/custom_modes.yaml   # or merge only the entries you want into an existing file
+mkdir -p .bob && cp modes/custom_modes.yaml .bob/custom_modes.yaml   # ou fusionnez seulement les entrées voulues dans un fichier existant
 ```
 
-Global modes: merge the entries into `~/.bob/settings/custom_modes.yaml` (Settings → Modes → Edit Global Modes). Project modes take precedence over global ones with the same slug. Optional per-mode rules can go in `.bob/rules-tech-lead-reviewer/`, `.bob/rules-security-remediator/` or `.bob/rules-tech-writer/` (files loaded alphabetically).
+Modes globaux : fusionnez les entrées dans `~/.bob/settings/custom_modes.yaml` (Paramètres → Modes → Edit Global Modes). Un mode du projet remplace un mode global de même slug. Des règles propres à un mode peuvent être ajoutées dans `.bob/rules-tech-lead-reviewer/`, `.bob/rules-security-remediator/` ou `.bob/rules-tech-writer/` (fichiers chargés par ordre alphabétique).
 
-## Limiting commands
+## Limiter les commandes
 
-A mode can only allow or deny the whole `execute` group; it cannot restrict *which* commands run. `tech-lead-reviewer` and `security-remediator` need `execute` (to fetch MRs, build, test and scan), so their instructions ask for read-only or build-and-test commands only. To enforce it, use Bob's approval settings in `~/.bob/settings/settings.json`. They apply to **all modes**, so keep them compatible with your other work. For example:
+Un mode peut seulement autoriser ou refuser tout le groupe `execute` ; il ne peut pas choisir *quelles* commandes s'exécutent. `tech-lead-reviewer` et `security-remediator` ont besoin d'`execute` (pour récupérer les MR, builder, tester et scanner) : leurs instructions demandent donc de se limiter aux commandes de lecture, de build et de test. Pour l'imposer, utilisez les réglages d'approbation de Bob dans `~/.bob/settings/settings.json`. Ils s'appliquent à **tous les modes** : gardez-les compatibles avec votre travail habituel. Par exemple :
 
 ```json
 "approval": {
@@ -39,6 +39,8 @@ A mode can only allow or deny the whole `execute` group; it cannot restrict *whi
 }
 ```
 
-With this example, `mcp` is not in `allowed_permissions`, so every MCP call (including creating or updating Confluence pages from `tech-writer`) still asks for confirmation: keep it that way unless you want writes to happen without review.
+Dans cet exemple, `mcp` ne figure pas dans `allowed_permissions` : chaque appel MCP, y compris la création ou la mise à jour de pages Confluence par `tech-writer`, demande donc toujours une confirmation. Gardez ce réglage, sauf si vous acceptez des écritures sans relecture.
 
-Approved commands run without a prompt; anything else still asks for your approval; denied commands are always refused (denials take precedence). Check the current schema in the [approval settings docs](https://bob.ibm.com/docs/shell/configuration/approval-settings).
+Les commandes approuvées s'exécutent sans confirmation ; toute autre commande demande votre accord ; les commandes refusées le sont toujours (le refus l'emporte). Vérifiez le schéma actuel dans la [documentation des réglages d'approbation](https://bob.ibm.com/docs/shell/configuration/approval-settings).
+
+Pour un contrôle plus fin que ces préfixes de commande (par exemple bloquer `git push --force` mais pas `git push`), utilisez le hook [`command_guard`](../hooks/README.md).
