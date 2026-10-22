@@ -27,14 +27,14 @@ Pour tous vos projets : copiez les scripts dans `~/.bob/hooks/`, ajoutez le bloc
 
 ## Et si un hook ne fonctionne pas ?
 
-**Il ne bloque pas Bob.** Seul le code de sortie `2` bloque une action, et seulement pour `PreToolUse` et `UserPromptSubmit`. Tout autre échec est journalisé puis ignoré. Ces scripts attrapent leurs propres erreurs et renvoient `0` : un bug laisse passer l'action, il ne la bloque pas. En contrepartie, un garde cassé ne protège plus : vérifiez-les avec les tests ci-dessous après chaque modification. Les messages de blocage sont écrits sur la sortie d'erreur, donc dans les logs de Bob.
+**Il ne bloque pas Bob.** Seul le code de sortie `2` bloque une action, et seulement pour `PreToolUse` et `UserPromptSubmit`. Tout autre échec est journalisé puis ignoré. Ces scripts attrapent leurs propres erreurs et renvoient `0` : un bug laisse passer l'action, il ne la bloque pas. En contrepartie, un garde cassé ne protège plus : vérifiez-les avec les tests ci-dessous après chaque modification. Quand un hook bloque, son message (sortie d'erreur) est renvoyé au modèle comme résultat de l'outil : le modèle connaît la raison du blocage et ne retente pas.
 
 ## Personnaliser
 
 - **Faux secret volontaire** (fixture de test) : ajoutez `bob-allow-secret` sur la ligne.
 - **Règles de commandes** : la liste `RULES` en tête de `command_guard.py`.
 - **Mode strict git** : avec `BOBKIT_STRICT_GIT=1` dans l'environnement de Bob, `git commit` et `git push` sont aussi bloqués.
-- **Noms d'outils** : la doc Bob ne cite que `write_file`. Le matcher couvre aussi `write_to_file`, `apply_diff`, `search_and_replace` et `insert_content` ; ajustez-le si votre version de Bob utilise d'autres noms.
+- **Noms d'outils** : confirmés avec Bob Shell 2.0.6 : `write_file`, `search_and_replace`, `insert_content` (écritures), `execute_command` (commandes), `list_files`. Le matcher inclut aussi `write_to_file` et `apply_diff` par précaution pour d'autres versions de Bob ; ajustez-le si la vôtre utilise d'autres noms.
 
 ## Tester
 
@@ -43,3 +43,14 @@ python3 tools/test_hooks.py
 ```
 
 Les tests envoient aux scripts les mêmes JSON que Bob et vérifient les codes de sortie : secrets en écriture et dans les prompts, commandes dangereuses et commandes légitimes, migrations dans un vrai dépôt git, contexte projet, masquage dans le journal d'audit, et comportement en cas d'entrée invalide (toujours `0`).
+
+## Testé dans Bob Shell 2.0.6
+
+Testés de bout en bout avec Bob Shell 2.0.6, dans un projet jetable :
+- `project_context` : le contexte arrive bien dans celui du modèle au démarrage de la session ;
+- `secret_guard` : écriture d'un token bloquée, et prompt contenant un token bloqué avant d'atteindre le modèle (aucun coût) ;
+- `command_guard` : `git reset --hard` bloqué ;
+- `migration_guard` : modification d'une migration déjà présente sur `main` bloquée ;
+- `audit_log` : journal écrit pour les outils exécutés (les actions bloquées n'y figurent pas, car `PostToolUse` ne se déclenche qu'après un outil qui a abouti).
+
+`notify_done` n'a pas été testé de bout en bout (dépend du bureau).
