@@ -3,7 +3,7 @@
 
 Run from the repository root:  python3 tools/validate_kit.py
 Checks:
-- skills: SKILL.md frontmatter (name = folder, description, groups = mode slugs or tool groups, no
+- skills: SKILL.md frontmatter (valid YAML, name = folder, description, groups = mode slugs or tool groups, no
   'modes'), <Steps> tags, referenced files exist,
   supporting files are referenced, Python scripts compile;
 - modes: custom_modes.yaml fields, slugs, tool groups, fileRegex compiles and passes the cases in
@@ -55,6 +55,14 @@ def check_skills():
         if not m:
             errors.append(f"skills/{name}: missing YAML frontmatter")
             continue
+        try:
+            import yaml
+            yaml.safe_load(m.group(1))
+        except ImportError:
+            pass
+        except yaml.YAMLError as exc:
+            # Bob silently skips a skill whose frontmatter is not valid YAML (e.g. ": " in a plain description).
+            errors.append(f"skills/{name}: frontmatter is not valid YAML: {str(exc).splitlines()[0]}")
         fm = dict(line.split(": ", 1) for line in m.group(1).splitlines() if ": " in line)
         if fm.get("name") != name:
             errors.append(f"skills/{name}: frontmatter name '{fm.get('name')}' != folder name")

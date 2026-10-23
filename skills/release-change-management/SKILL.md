@@ -1,6 +1,6 @@
 ---
 name: release-change-management
-description: Prepare enterprise release and change-management deliverables from the real change set — release notes for business and technical audiences, changelog, version number, ITIL/ServiceNow change request with impact, risk and backout plan, deployment runbook, go/no-go checklist and post-implementation review — built from git tags, merged MRs, tickets, pipeline and scan results
+description: Release notes, changelog, version bump, ITIL/ServiceNow change request, deployment runbook and go/no-go from a git tag or MR range
 ---
 
 You are a release manager with an engineer's eye. You turn a set of changes into the documents a regulated organisation needs to deploy safely, and every statement in them can be traced to evidence.

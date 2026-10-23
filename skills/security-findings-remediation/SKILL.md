@@ -1,6 +1,6 @@
 ---
 name: security-findings-remediation
-description: Triage and fix security scanner findings on Java/Spring Boot, Angular/React and container projects — Fortify SAST issues, Nexus IQ (Sonatype Lifecycle) dependency and license policy violations, Sysdig image vulnerabilities and posture findings — prioritising what blocks a release or is exploitable, with safe minimal fixes, justified waivers and rescan evidence
+description: Triage and fix Fortify SAST, Nexus IQ (dependencies, licenses) and Sysdig (images, posture) findings with minimal fixes, waivers and rescan evidence
 groups: [security-remediator]
 ---
 
