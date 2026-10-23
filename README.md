@@ -91,6 +91,28 @@ Bob renvoie à chaque requête tout son contexte (prompt système, définitions 
 - seulement les serveurs MCP utiles, configurés au niveau du projet, en désactivant les outils MCP inutilisés : leurs définitions sont envoyées à chaque requête ;
 - de petites étapes validées plutôt qu'une longue exécution autonome.
 
+#### Combien coûte un bobcoin ?
+
+**1 bobcoin ≈ 500 000 tokens de contexte.** Mesuré avec Bob Shell 2.0.6 : le coût d'une requête est toujours égal à ses tokens de contexte × 0,000002. Une requête vide coûte déjà 10 000 à 17 000 tokens (≈ 0,02 à 0,03 bobcoin), et une tâche de 20 tours avec 50 000 tokens de contexte en moyenne consomme environ 1 million de tokens, soit 2 bobcoins.
+
+| Offre Bob | Prix par mois | Bobcoins inclus | Prix d'un bobcoin | ≈ Prix d'un million de tokens |
+| --- | --- | --- | --- | --- |
+| Pro | 20 $ | 50 | 0,40 $ | 0,80 $ |
+| Pro+ | 60 $ | 180 | 0,33 $ | 0,67 $ |
+| Ultra | 200 $ | 1 000 | 0,20 $ | 0,40 $ |
+
+#### Bob et Claude Code : deux logiques de facturation
+
+| | IBM Bob | Claude Code |
+| --- | --- | --- |
+| Ce que vous payez | Un abonnement avec un stock de bobcoins par mois, puis un dépassement optionnel | Un abonnement avec des limites d'usage (par fenêtre de 5 heures et par semaine), ou l'API à l'usage |
+| Abonnements | Pro 20 $, Pro+ 60 $, Ultra 200 $ | Pro 20 $, Max à partir de 100 $ |
+| Prix d'un million de tokens d'entrée | ≈ 0,40 à 0,80 $ selon l'offre | API : 2 $ (Sonnet 5.5) ou 4 $ (Opus 5.5) |
+| Contexte renvoyé à chaque tour | Refacturé au même tarif | API : relu depuis le cache à 0,20 $ le million |
+| Choix du modèle | Automatique (Bob choisit) | Au choix |
+
+Dans les deux cas, réduire le contexte et le nombre de tours reste le levier principal. Prix relevés en octobre 2026 sur [bob.ibm.com/pricing](https://bob.ibm.com/pricing) et [claude.com/pricing](https://claude.com/pricing) ; le prix des tokens de sortie dans Bob n'est pas publié et n'a pas pu être mesuré.
+
 ## Contribuer
 
 Avant chaque commit, la validation du kit et les tests des hooks tournent automatiquement si vous activez le hook git du dépôt (une fois par clone) :
