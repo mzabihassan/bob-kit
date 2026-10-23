@@ -3,7 +3,8 @@
 
 Run from the repository root:  python3 tools/validate_kit.py
 Checks:
-- skills: SKILL.md frontmatter (name = folder, description), <Steps> tags, referenced files exist,
+- skills: SKILL.md frontmatter (name = folder, description, groups = mode slugs or tool groups, no
+  'modes'), <Steps> tags, referenced files exist,
   supporting files are referenced, Python scripts compile;
 - modes: custom_modes.yaml fields, slugs, tool groups, fileRegex compiles and passes the cases in
   tools/mode_regex_cases.json (needs PyYAML; skipped with a warning otherwise);
@@ -31,6 +32,14 @@ def syntax_error(path):
     return None
 
 
+def mode_slugs():
+    """Slugs declared in modes/custom_modes.yaml (read without PyYAML)."""
+    path = os.path.join(ROOT, "modes", "custom_modes.yaml")
+    if not os.path.isfile(path):
+        return set()
+    return set(re.findall(r"^\s*- slug:\s*(\S+)", open(path, encoding="utf-8").read(), re.M))
+
+
 def check_skills():
     base = os.path.join(ROOT, "skills")
     for name in sorted(os.listdir(base)):
@@ -51,6 +60,17 @@ def check_skills():
             errors.append(f"skills/{name}: frontmatter name '{fm.get('name')}' != folder name")
         if not fm.get("description"):
             errors.append(f"skills/{name}: missing description")
+        if "modes" in fm:
+            errors.append(f"skills/{name}: Bob ignores 'modes'; use 'groups: [<mode-slug>]' to limit the skill to a mode")
+        if "groups" in fm:
+            # Bob offers the skill only in modes whose slug or tool groups match; a typo hides it everywhere.
+            g = re.fullmatch(r"\[(.*)\]", fm["groups"].strip())
+            values = [v.strip() for v in g.group(1).split(",") if v.strip()] if g else []
+            if not values:
+                errors.append(f"skills/{name}: groups must be a non-empty inline list, e.g. [security-remediator]")
+            for v in values:
+                if v not in GROUPS and v not in mode_slugs():
+                    errors.append(f"skills/{name}: groups value '{v}' is neither a mode slug nor a tool group")
         body = text[m.end():]
         if "<Steps>" not in body or body.count("<Step>") != body.count("</Step>"):
             errors.append(f"skills/{name}: unbalanced or missing <Steps>/<Step> tags")

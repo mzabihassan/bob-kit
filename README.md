@@ -79,6 +79,8 @@ Copiez le dossier d'un skill dans le répertoire `.bob/skills/` de votre projet 
 cp -R skills/angular2-developer /chemin/vers/le/projet/.bob/skills/
 ```
 
+Certains skills ne sont proposés que dans un mode, grâce au champ `groups` de leur frontmatter : Bob n'affiche le skill (dans les skills disponibles et dans les commandes `/`) que si le mode actif porte ce slug ou l'un de ces groupes d'outils. C'est le cas de `security-findings-remediation` (`groups: [security-remediator]`) : installez aussi le mode [security-remediator](modes/README.md), sinon le skill n'apparaît dans aucun mode. Pour le rendre disponible partout, supprimez la ligne `groups`. Le champ `modes`, parfois proposé, est ignoré par Bob (vérifié avec Bob Shell 2.0.6).
+
 ## Contribuer
 
 Avant chaque commit, la validation du kit et les tests des hooks tournent automatiquement si vous activez le hook git du dépôt (une fois par clone) :

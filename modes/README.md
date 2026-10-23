@@ -12,6 +12,8 @@ L'accès à Confluence pour `tech-writer` nécessite un serveur MCP Atlassian co
 
 Les restrictions `fileRegex` sont testées sur des chemins d'exemple autorisés et refusés (`tools/mode_regex_cases.json`, vérifiés par `tools/validate_kit.py`).
 
+Le skill `security-findings-remediation` est réservé au mode `security-remediator` (`groups: [security-remediator]` dans son frontmatter) : il n'est pas proposé dans les autres modes, ce qui allège leur prompt. Installez donc ce mode avec le skill.
+
 ## Installation
 
 Modes du projet (partagés avec l'équipe via git) :
