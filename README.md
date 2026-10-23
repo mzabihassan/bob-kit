@@ -81,6 +81,16 @@ cp -R skills/angular2-developer /chemin/vers/le/projet/.bob/skills/
 
 Certains skills ne sont proposés que dans un mode, grâce au champ `groups` de leur frontmatter : Bob n'affiche le skill (dans les skills disponibles et dans les commandes `/`) que si le mode actif porte ce slug ou l'un de ces groupes d'outils. C'est le cas de `security-findings-remediation` (`groups: [security-remediator]`) : installez aussi le mode [security-remediator](modes/README.md), sinon le skill n'apparaît dans aucun mode. Pour le rendre disponible partout, supprimez la ligne `groups`. Le champ `modes`, parfois proposé, est ignoré par Bob (vérifié avec Bob Shell 2.0.6).
 
+### Économiser des bobcoins
+
+Bob renvoie à chaque requête tout son contexte (prompt système, définitions des outils, skills, historique) et facture le contexte complet à chaque tour. Ce qui coûte, c'est donc la taille du contexte et le nombre de tours. Les skills bob-kit sont écrits pour rester courts, lire le code de façon ciblée et confier les lectures larges à des sous-agents (`spawn_subagent`), dont seul le résultat revient dans la tâche. De votre côté, d'après les [recommandations d'IBM](https://bob.ibm.com/docs/ide/core-concepts/context-window-management) :
+
+- une tâche par objectif, et une nouvelle tâche (**+**) dès que le sujet change ;
+- des prompts précis qui nomment les fichiers et les fonctions ; des mentions ciblées (`@/src/app/service.ts:45-67`) plutôt que des dossiers entiers ;
+- un `AGENTS.md` et des règles courts, sans les répéter dans chaque prompt ;
+- seulement les serveurs MCP utiles, configurés au niveau du projet, en désactivant les outils MCP inutilisés : leurs définitions sont envoyées à chaque requête ;
+- de petites étapes validées plutôt qu'une longue exécution autonome.
+
 ## Contribuer
 
 Avant chaque commit, la validation du kit et les tests des hooks tournent automatiquement si vous activez le hook git du dépôt (une fois par clone) :

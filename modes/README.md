@@ -8,7 +8,7 @@ Des modes personnalisés pour IBM Bob, définis dans [`custom_modes.yaml`](custo
 | 🛡️ `security-remediator` | Corrige les findings de sécurité Fortify, Nexus IQ, Sysdig et SonarQube | `read`, `edit` **sauf** les pipelines CI (`.gitlab-ci.yml`, `.gitlab/`, `.github/`, `Jenkinsfile`), la configuration des scanners et des politiques (`sonar-project.properties`, fichiers Fortify) et `.bob/`, `execute`, `mcp`, `skill`, `todo` |
 | 📘 `tech-writer` | Rédige et met à jour la documentation du dépôt et de Confluence (via le serveur MCP), sans toucher au code | `read`, `edit` **uniquement pour la documentation** (Markdown, AsciiDoc, reStructuredText, diagrammes sous `docs/` ; jamais `AGENTS.md`, `CLAUDE.md` ni `.bob/`), `mcp`, `skill`, `todo`, `mode`. **Pas d'`execute`** : les commandes documentées sont marquées comme non vérifiées |
 
-L'accès à Confluence pour `tech-writer` nécessite un serveur MCP Atlassian configuré dans Bob : le serveur MCP Rovo d'Atlassian pour Cloud, ou `mcp-atlassian` pour Cloud ou Data Center.
+L'accès à Confluence pour `tech-writer` nécessite un serveur MCP Atlassian configuré dans Bob : le serveur MCP Rovo d'Atlassian pour Cloud, ou `mcp-atlassian` pour Cloud ou Data Center. Ses définitions d'outils sont envoyées à chaque requête dans les modes qui ont le groupe `mcp` : configurez-le dans le projet qui en a besoin (pas en global) et désactivez les outils que vous n'utilisez pas (par exemple ceux de Jira si vous n'écrivez que dans Confluence).
 
 Les restrictions `fileRegex` sont testées sur des chemins d'exemple autorisés et refusés (`tools/mode_regex_cases.json`, vérifiés par `tools/validate_kit.py`).
 

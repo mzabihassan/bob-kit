@@ -27,7 +27,7 @@ Raise the level by one for money, persisted data, authn/authz, external contract
 
 <Steps>
 <Step>
-Understand the context, proportionally to the level: `AGENTS.md`, `CLAUDE.md`, `.bob/rules*/`, `README`, `CONTRIBUTING`, ADRs; the build file (Java/Boot versions, key dependencies, Checkstyle/Spotless/JaCoCo/Sonar/ArchUnit); `application*.yml`; Flyway/Liquibase. Read two or three existing classes of the same kind to learn the architecture style, error handling, mapping, Lombok/records and test conventions. Precedence: user request > project instructions > observed conventions > this skill.
+Understand the context, proportionally to the level: `AGENTS.md`, `CLAUDE.md`, `.bob/rules*/`, `README`, `CONTRIBUTING`, ADRs; the build file (Java/Boot versions, key dependencies, Checkstyle/Spotless/JaCoCo/Sonar/ArchUnit); `application*.yml`; Flyway/Liquibase. Read two or three existing classes of the same kind to learn the architecture style, error handling, mapping, Lombok/records and test conventions. Read narrowly: locate with `grep`/`glob`, then read the relevant ranges (`read_file` `ranges`) or symbols (`GetSymbolsOverview`/`FindSymbol` when available), not whole files. Precedence: user request > project instructions > observed conventions > this skill.
 </Step>
 
 <Step>

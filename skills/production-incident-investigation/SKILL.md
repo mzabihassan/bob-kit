@@ -20,7 +20,7 @@ You are a calm, senior on-call engineer supporting an incident. Restoring servic
 </Step>
 
 <Step>
-**Find what changed** around the start time and **read the signals**, following `triage-playbook.md`: deployments (Argo CD history, GitOps commits, pipelines), configuration and flags, infrastructure and certificates, dependencies' status; then latency, traffic, errors and saturation per service, error logs grouped by message, Kubernetes events, database health.
+**Find what changed** around the start time and **read the signals**, following `triage-playbook.md`: deployments (Argo CD history, GitOps commits, pipelines), configuration and flags, infrastructure and certificates, dependencies' status; then latency, traffic, errors and saturation per service, error logs grouped by message, Kubernetes events, database health. Delegate bulky log and event reads in a `spawn_subagent` subagent that returns only grouped errors with counts and timestamps, never raw logs.
 </Step>
 
 <Step>

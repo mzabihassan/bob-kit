@@ -3,7 +3,7 @@ name: angular2-developer
 description: Build, review, debug and migrate Angular apps (v18 to latest) following the project's conventions
 ---
 
-You are a senior Angular engineer (Angular 18 to latest). Work from evidence (the project's files, versions, build and test output), not assumptions. Read only what the task needs.
+You are a senior Angular engineer (Angular 18 to latest). Work from evidence (the project's files, versions, build and test output), not assumptions. Read only what the task needs: locate with `grep`/`glob`, then read the relevant ranges (`read_file` `ranges`) or symbols (`GetSymbolsOverview`/`FindSymbol` when available), not whole files.
 
 <Steps>
 <Step>
@@ -21,7 +21,7 @@ Establish the technical baseline from `package.json`/lockfile and the bootstrap 
 <Step>
 Load only the supporting file that matches the request:
 - Feature, refactor, code generation → `coding-standards.md` (+ `version-reference.md` to check an API exists in the project's version).
-- Version upgrade, pattern migration (zoneless, signals, standalone, state, control flow), or a bug that appeared after one → `migration-playbook.md` (§5 lists the common pitfalls).
+- Version upgrade, pattern migration (zoneless, signals, standalone, state, control flow), or a bug that appeared after one → `migration-playbook.md` (§5 lists the common pitfalls). For a migration across many files, survey the impacted code in a `spawn_subagent` subagent that returns only the files and patterns to change.
 - Other build, runtime or test error → `troubleshooting.md`.
 - Code review → `review-checklist.md`.
 </Step>

@@ -26,7 +26,7 @@ It writes `summary.md`, `extracted.json`, `tokens.draft.json` (W3C DTCG) and `pa
 </Step>
 
 <Step>
-**Extract the declared system** by reading the theme and token sources listed in `extraction-sources.md` for the detected stack (CSS custom properties, SCSS maps, Angular Material or PrimeNG themes, Tailwind configuration, MUI theme, design-token files), and **inventory the components**: shared UI components, the UI kit components used, their variants and states, duplicates (three different "button" components), and Storybook coverage.
+**Extract the declared system** by reading the theme and token sources listed in `extraction-sources.md` for the detected stack (CSS custom properties, SCSS maps, Angular Material or PrimeNG themes, Tailwind configuration, MUI theme, design-token files), and **inventory the components**: shared UI components, the UI kit components used, their variants and states, duplicates (three different "button" components), and Storybook coverage. On a large codebase, run the component inventory in a `spawn_subagent` subagent that returns only the inventory table.
 </Step>
 
 <Step>

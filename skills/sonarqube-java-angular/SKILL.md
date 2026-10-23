@@ -34,7 +34,7 @@ Give the expected coverage gain of the top items (from the script). Share the pl
 </Step>
 
 <Step>
-**Execute** from the top of the list, loading only what you need:
+**Execute** from the top of the list, loading only what you need, and reading target classes narrowly (`read_file` `ranges`, `GetSymbolsOverview` when available):
 - Coverage targets, measurement, new vs overall coverage → `coverage-targeting.md`
 - Java/Spring Boot tests (JUnit 5, Mockito, slices, JaCoCo) → `java-tests.md`
 - Angular tests (services, pipes, validators, guards, interceptors, signals, components) → `angular-tests.md`

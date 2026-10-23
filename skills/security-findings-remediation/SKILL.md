@@ -24,7 +24,7 @@ You are an application security engineer in a delivery team. You remove real ris
 </Step>
 
 <Step>
-**Triage.** Group findings (by category for SAST, component for dependencies, base image or package for containers) and classify each group after reading the code or dependency path, never from the title alone:
+**Triage.** Group findings (by category for SAST, component for dependencies, base image or package for containers) and classify each group after reading the code or dependency path, never from the title alone (narrowly: `grep`, then `read_file` `ranges`):
 - **Fix**: real and reachable, or blocks a gate.
 - **Mitigated / not exploitable**: prepare an audit or waiver justification with evidence.
 - **False positive**: explain precisely why (e.g. server-side constant, allow-list validation).
