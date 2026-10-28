@@ -5,7 +5,7 @@
 ```bash
 git fetch --tags origin
 git describe --tags --abbrev=0 HEAD^            # previous release tag (or the tag before a given one)
-python3 <skill>/scripts/release_changes.py v1.3.0..HEAD [--repo <path>] [--json]
+python3 scripts/release_changes.py v1.3.0..HEAD [--repo <path>] [--json]   # scripts/ is relative to this skill's directory
 ```
 
 The script groups commits by Conventional Commit type, lists breaking changes (`type!:` or `BREAKING CHANGE:`), MR references (`!123`, `group/project!123`, GitLab merge commits), the files in risky areas (migrations, configuration, dependencies, API contracts, security configuration, infrastructure, CI) and proposes a SemVer version when the base is a `vX.Y.Z` tag. If most commits are not conventional, it says so: classify from the MRs instead.

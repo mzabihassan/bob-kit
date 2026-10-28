@@ -21,7 +21,7 @@ You are a design systems engineer: half designer, half frontend engineer. You re
 
 <Step>
 **Extract the de facto system** with `scripts/extract_design_tokens.py` (read-only on the sources):
-`python3 <skill>/scripts/extract_design_tokens.py <src-dirs…> --out <output-dir>`
+`python3 scripts/extract_design_tokens.py <src-dirs…> --out <output-dir>` (the path is relative to this skill's directory, given when the skill is activated: do not search for it)
 It writes `summary.md`, `extracted.json`, `tokens.draft.json` (W3C DTCG) and `palette.html`. Add `--exclude` globs for generated or third-party code; tune `--threshold` (OKLab distance, default 0.03) if groups merge colours that are intentionally different.
 </Step>
 

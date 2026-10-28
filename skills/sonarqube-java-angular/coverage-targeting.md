@@ -10,14 +10,15 @@
 ## Find candidates fast
 
 ```bash
+# scripts/ is relative to this skill's directory (given when the skill is activated)
 # Java (Maven / Gradle), after running tests with JaCoCo
-python3 <skill>/scripts/coverage_hotspots.py target/site/jacoco/jacoco.xml --src .
-python3 <skill>/scripts/coverage_hotspots.py $(find . -path '*/jacoco*/*.xml' -not -path '*/node_modules/*') --src .
+python3 scripts/coverage_hotspots.py target/site/jacoco/jacoco.xml --src .
+python3 scripts/coverage_hotspots.py $(find . -path '*/jacoco*/*.xml' -not -path '*/node_modules/*') --src .
 # Angular, after `ng test --code-coverage` / `jest --coverage` / `vitest run --coverage`
-python3 <skill>/scripts/coverage_hotspots.py $(find coverage -name lcov.info) --src .
+python3 scripts/coverage_hotspots.py $(find coverage -name lcov.info) --src .
 # New code only
 git diff --name-only origin/main...HEAD > /tmp/changed.txt
-python3 <skill>/scripts/coverage_hotspots.py target/site/jacoco/jacoco.xml --changed /tmp/changed.txt
+python3 scripts/coverage_hotspots.py target/site/jacoco/jacoco.xml --changed /tmp/changed.txt
 ```
 
 The script ranks files by `max gain / effort`, where effort is a heuristic based on the file's kind, the number of injected dependencies, use of infrastructure (DB, HTTP, files, DOM, timers) and whether a test already exists. It also excludes tests and generated code (add `--exclude` globs if needed). It is a shortlist, not a verdict: open the top candidates and confirm before writing tests.
