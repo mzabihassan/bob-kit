@@ -1,0 +1,7 @@
+# Justified SkillSpector suppressions for skills/spring-boot-developer (see README, section Sécurité).
+version: 2
+rules:
+  - id: "EA4"
+    path: "code-review.md"
+    message: "unbounded queries"
+    reason: "Review item: flag unbounded queries in the reviewed code."

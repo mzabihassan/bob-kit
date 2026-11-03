@@ -1,0 +1,15 @@
+# Justified SkillSpector suppressions for skills/ibm-cloud-platform (see README, section Sécurité).
+version: 2
+rules:
+  - id: "PE3"
+    path: "SKILL.md"
+    message: "kubeconfig"
+    reason: "Prohibition: never print, store or commit kubeconfigs."
+  - id: "PE3"
+    path: "cli-iac-troubleshooting.md"
+    message: "kubeconfig"
+    reason: "Standard ibmcloud ks cluster config command, with --admin avoided unless agreed."
+  - id: "EA2"
+    path: "cli-iac-troubleshooting.md"
+    message: "disable verification"
+    reason: "Prohibition: trust the database CA, never disable TLS verification."

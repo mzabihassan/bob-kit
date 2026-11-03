@@ -1,0 +1,7 @@
+# Justified SkillSpector suppressions for skills/sql-database-engineer (see README, section Sécurité).
+version: 2
+rules:
+  - id: "YR4"
+    path: "SKILL.md"
+    message: "*disable constraints*"
+    reason: "Prohibition: never disable constraints, triggers or audit without explicit agreement."

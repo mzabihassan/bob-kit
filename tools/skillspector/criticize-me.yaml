@@ -1,0 +1,7 @@
+# Justified SkillSpector suppressions for skills/criticize-me (see README, section Sécurité).
+version: 2
+rules:
+  - id: "EA2"
+    path: "critique-lenses.md"
+    message: "without verification"
+    reason: "Critique question on tests that bring coverage without verification; not an instruction to skip checks."

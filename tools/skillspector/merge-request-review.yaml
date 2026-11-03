@@ -1,0 +1,11 @@
+# Justified SkillSpector suppressions for skills/merge-request-review (see README, section Sécurité).
+version: 2
+rules:
+  - id: "TM3"
+    path: "review-checklist.md"
+    message: "bypassSecurity"
+    reason: "Names the Angular bypassSecurityTrust* APIs as an XSS risk to remove or flag; never recommends calling them."
+  - id: "EA4"
+    path: "review-checklist.md"
+    message: "unbounded queries"
+    reason: "Review item: flag unbounded queries in the reviewed change."

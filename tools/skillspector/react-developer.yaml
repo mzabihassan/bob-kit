@@ -1,0 +1,11 @@
+# Justified SkillSpector suppressions for skills/react-developer (see README, section Sécurité).
+version: 2
+rules:
+  - id: "MP3"
+    path: "coding-standards.md"
+    message: "reset state"
+    reason: "React idiom: reset a component's state with a key instead of an effect."
+  - id: "EA2"
+    path: "coding-standards.md"
+    message: "without asking"
+    reason: "Restriction, not agency: do not introduce a new library without asking the user."

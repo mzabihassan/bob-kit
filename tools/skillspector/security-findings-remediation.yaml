@@ -1,0 +1,7 @@
+# Justified SkillSpector suppressions for skills/security-findings-remediation (see README, section Sécurité).
+version: 2
+rules:
+  - id: "TM3"
+    path: "fortify.md"
+    message: "bypassSecurity"
+    reason: "Names the Angular bypassSecurityTrust* APIs as an XSS risk to remove or flag; never recommends calling them."

@@ -1,0 +1,15 @@
+# Justified SkillSpector suppressions for skills/angular2-developer (see README, section Sécurité).
+version: 2
+rules:
+  - id: "EA2"
+    path: "coding-standards.md"
+    message: "without asking"
+    reason: "Restriction, not agency: do not introduce a new state-management library without asking the user."
+  - id: "TM3"
+    path: "coding-standards.md"
+    message: "bypassSecurity"
+    reason: "Names the Angular bypassSecurityTrust* APIs as an XSS risk to remove or flag; never recommends calling them."
+  - id: "TM3"
+    path: "review-checklist.md"
+    message: "bypassSecurity"
+    reason: "Names the Angular bypassSecurityTrust* APIs as an XSS risk to remove or flag; never recommends calling them."

@@ -1,0 +1,7 @@
+# Justified SkillSpector suppressions for skills/argocd-gitops (see README, section Sécurité).
+version: 2
+rules:
+  - id: "PE3"
+    path: "SKILL.md"
+    message: "kubeconfig"
+    reason: "Prohibition: never print or commit kubeconfigs or Argo CD tokens; the skill never reads one."

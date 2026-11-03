@@ -69,9 +69,10 @@ def findings_schema():
             "audit": {"type": "object", "required": ["date", "title", "catalog_controls", "agents"]},
             "repositories": {"type": "array", "items": {"type": "object", "required": ["label", "roles"]}},
             "architecture": {"type": "object"}, "summary": {"type": "object"},
-            "controls": {"type": "array", "items": {"type": "object", "required": ["id", "domain", "title", "status", "summary", "evidence",
-                                                                                  "repos", "runtime", "gate", "assessed"],
-                                                    "properties": {"status": {"enum": STATUSES}, "evidence": {"type": "array", "items": ev}}}},
+            "controls": {"type": "array", "items": {
+                "type": "object",
+                "required": ["id", "domain", "title", "status", "summary", "evidence", "repos", "runtime", "gate", "assessed"],
+                "properties": {"status": {"enum": STATUSES}, "evidence": {"type": "array", "items": ev}}}},
             "findings": {"type": "array", "items": {"type": "object", "required": [
                 "id", "key", "control", "domain", "title", "severity", "priority", "kind", "blocker", "cross_repo", "repos", "evidence",
                 "impact", "remediation", "validation", "acceptance"], "properties": {

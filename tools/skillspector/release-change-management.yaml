@@ -1,0 +1,14 @@
+# Justified SkillSpector suppressions for skills/release-change-management (see README, section Sécurité).
+version: 2
+rules:
+  - id: "LP3"
+    path: "SKILL.md"
+    reason: "Bob Shell does not read allowed-tools/permissions from the front matter: tool access comes from the Bob mode and its approvals. The scripts only read the analysed repositories (tools/test_security.py)."
+  - id: "AST4"
+    path: "scripts/release_changes.py"
+    message: "*SAFE_GIT*"
+    reason: "Read-only git queries through SAFE_GIT: argument list without a shell, core.fsmonitor and hooks disabled by command-line overrides, no optional index lock (tools/test_security.py)."
+  - id: "PE3"
+    path: "scripts/release_changes.py"
+    message: ".env\""
+    reason: "File-name pattern that classifies changed files as configuration; file contents are not read."

@@ -26,3 +26,21 @@ jobs:
       - name: Test the scripts and hooks against hostile repositories
         run: python3 tools/test_security.py
 
+  skillspector:
+    # Static scan of every skill (no LLM, nothing leaves the runner); fails on any finding
+    # that tools/skillspector/<skill>.yaml does not justify.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install SkillSpector v2.13.0 (pinned commit)
+        run: pip install "skillspector @ git+https://github.com/NVIDIA/SkillSpector@091a509b3d6ba8ff5be528966e1f43c2e68cf214"
+      - name: Scan the skills
+        run: python3 tools/scan_skills.py --out skillspector-reports
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: skillspector-reports
+          path: skillspector-reports/

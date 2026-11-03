@@ -1,0 +1,10 @@
+# Justified SkillSpector suppressions for skills/sonarqube-java-angular (see README, section Sécurité).
+version: 2
+rules:
+  - id: "LP3"
+    path: "SKILL.md"
+    reason: "Bob Shell does not read allowed-tools/permissions from the front matter: tool access comes from the Bob mode and its approvals. The scripts only read the analysed repositories (tools/test_security.py)."
+  - id: "TM3"
+    path: "issue-remediation.md"
+    message: "bypassSecurity"
+    reason: "Names the Angular bypassSecurityTrust* APIs as an XSS risk to remove or flag; never recommends calling them."

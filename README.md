@@ -27,7 +27,8 @@ skills/          # un dossier par skill, chacun avec un point d'entrée SKILL.md
   cloud-migration-audit-java-angular/
 modes/           # modes Bob personnalisés (custom_modes.yaml)
 hooks/           # lifecycle hooks Bob (scripts Python + settings.example.json)
-tools/           # validation du kit, tests des hooks, hook git pre-commit
+tools/           # validation du kit, tests (hooks, audit cloud, sécurité), scan SkillSpector, hook git pre-commit
+  skillspector/  # baselines SkillSpector justifiées, une par skill
 ```
 
 ## Skills
@@ -119,12 +120,61 @@ Bob renvoie à chaque requête tout son contexte (prompt système, définitions 
 
 Dans les deux cas, réduire le contexte et le nombre de tours reste le levier principal. Prix relevés en octobre 2026 sur [bob.ibm.com/pricing](https://bob.ibm.com/pricing) et [claude.com/pricing](https://claude.com/pricing) ; le prix des tokens de sortie dans Bob n'est pas publié et n'a pas pu être mesuré.
 
+## Sécurité
+
+Les skills lisent des dépôts qui ne sont pas toujours de confiance (code d'un fournisseur, clone récent, branche d'un tiers). Les scripts et les hooks sont écrits pour qu'un dépôt piégé ne puisse ni exécuter une commande, ni faire lire un fichier situé hors du dépôt, ni glisser un lien actif dans un document généré.
+
+| Risque | Protection | Où |
+| --- | --- | --- |
+| Commande exécutée par la configuration git du dépôt analysé (`core.fsmonitor`, hooks), dès un simple `git status` | git est toujours appelé avec `--no-optional-locks -c core.fsmonitor=false -c core.hooksPath=/dev/null` : la ligne de commande l'emporte sur la configuration du dépôt, git n'exécute rien et n'écrit aucun verrou d'index. Liste d'arguments, jamais de shell. | scripts de `cloud-migration-audit-java-angular`, `project-playbook-java-angular` et `release-change-management`, hooks `project_context` et `migration_guard` |
+| Lecture de fichiers hors du dépôt via un lien symbolique (clés, configurations d'un autre projet) | les liens dont la cible réelle sort du dossier analysé sont ignorés | audit cloud, playbook, `design-system`, `sonarqube-java-angular`, hook `project_context`, export Confluence |
+| Lien `javascript:` ou `data:` dans l'aperçu HTML copié dans Confluence | seuls les liens `http`, `https` et `mailto` sont conservés, quelle que soit la casse ou l'encodage HTML ; les autres deviennent du texte | `project-playbook-java-angular/scripts/confluence_export.py` |
+| Paquet ou image téléchargé à la volée par une commande proposée | `npx --no -- ng` n'utilise que la CLI Angular du projet ; les outils `npx` sont épinglés (`esbuild-visualizer@0.7.0`, `depcheck@1.4.7`, `codemod@1.18.6`, `types-react-codemod@3.5.3`) ; l'image Docker de reproduction d'un job GitLab est désignée par son digest | `angular2-developer`, `react-developer`, `security-findings-remediation`, `gitlab-ci-engineer` |
+
+`python3 tools/test_security.py` rejoue ces attaques sur un dépôt piégé (commande `core.fsmonitor`, liens symboliques vers l'extérieur, liens `javascript:`, `data:` et `vbscript:`, en majuscules ou encodés en entités HTML) et vérifie qu'elles restent sans effet tout en gardant les résultats attendus : 17 vérifications, dont 10 échouaient avec le code d'avant ces corrections.
+
+### Scan des skills avec SkillSpector
+
+[SkillSpector](https://github.com/NVIDIA/SkillSpector) (NVIDIA) analyse les skills d'agents : injection de prompt, exfiltration, commandes dangereuses, dépendances non épinglées, code obfusqué… Le kit l'utilise en mode statique (`--no-llm`) : rien n'est envoyé à un modèle, rien ne quitte la machine. Il faut Python 3.12 ou plus ; la version est épinglée par son commit, comme en CI :
+
+```bash
+pip install "skillspector @ git+https://github.com/NVIDIA/SkillSpector@091a509b3d6ba8ff5be528966e1f43c2e68cf214"
+```
+
+```bash
+python3 tools/scan_skills.py --out skillspector-reports
+```
+
+Le script scanne chaque skill séparément avec sa baseline `tools/skillspector/<skill>.yaml` (SkillSpector n'accepte pas de baseline dans un scan récursif), affiche le score, les constats actifs, les constats justifiés et la couverture de chaque skill, et échoue sur tout constat qu'aucune baseline ne justifie. Il signale aussi les règles qui ne correspondent plus à rien, pour qu'une baseline ne masque jamais plus que nécessaire. Le job `skillspector` de la CI fait la même chose à chaque push et conserve les rapports JSON.
+
+Résultats avec SkillSpector v2.13.0 en `--no-llm` sur les 19 skills :
+
+| | Avant (commit `740eb7f`) | Après durcissement | Avec les baselines |
+| --- | --- | --- | --- |
+| Constats | 66 (29 HIGH, 36 MEDIUM, 1 LOW) | 53 (29 HIGH, 24 MEDIUM) | 0 non justifié, 53 justifiés |
+| Dépendances non épinglées (RP1) | 12 | 1 (limite du parseur, image épinglée par digest) | 0 |
+| Skills avec un score de risque > 50 | 3 | 3 | 0 |
+
+Les 53 constats restants sont des faux positifs ou des limites du mode statique, chacun justifié dans la baseline de sa skill :
+
+- **Contrôles et motifs de détection** : l'audit cloud cherche lui-même `curl | sh`, `chmod 777`, `.npmrc` copié dans une image, `hostPath`, des jetons d'accès… Le scanner y lit les pratiques que le skill dénonce.
+- **Interdictions et points de revue** : « never disable verification », « do not introduce a new library without asking », `bypassSecurityTrust*` à retirer, requêtes non bornées à signaler, kubeconfigs à ne jamais afficher.
+- **Appels git en lecture** (AST4) : les appels `subprocess` passent par la commande git durcie décrite plus haut.
+- **Pas de périmètre d'outils déclaré** (LP3) : Bob ne lit pas `allowed-tools` dans le frontmatter ; l'accès aux outils est réglé par les modes et les approbations de Bob.
+- **Inspection partielle** (AE1) : en `--no-llm`, la couche déterministe s'arrête sur les scripts riches en expressions régulières et sur un long modèle de pages (couverture de 57 à 80 % pour `project-playbook-java-angular`, `cloud-migration-audit-java-angular` et `design-system`).
+
+Une règle de baseline cible un identifiant de règle, un fichier et le texte trouvé (quand le constat en a un), avec une raison obligatoire ; jamais un identifiant seul. Un nouveau constat, même de même type dans un autre fichier, fait donc échouer le scan. Quand vous montez la version de SkillSpector, relancez le scan et revoyez les baselines.
+
+Limites : SkillSpector ne remplace pas la revue. Les trois vulnérabilités corrigées plus haut (fsmonitor, liens symboliques, liens `javascript:`) n'étaient pas détectées par le scanner : elles ont été trouvées en relisant le code. Avant une release, complétez le scan statique par un scan avec LLM (`skillspector scan skills/<skill>` avec un fournisseur configuré, voir `skillspector scan --help`), qui inspecte aussi les fichiers que le mode statique ne couvre qu'en partie ; le contenu des skills est alors envoyé à ce fournisseur.
+
 ## Contribuer
 
-Avant chaque commit, la validation du kit et les tests des hooks tournent automatiquement si vous activez le hook git du dépôt (une fois par clone) :
+Avant chaque commit, la validation du kit et les tests (hooks, moteur de l'audit cloud, sécurité) tournent automatiquement si vous activez le hook git du dépôt (une fois par clone) :
 
 ```bash
 git config core.hooksPath tools/git-hooks
 ```
 
-Les mêmes vérifications tournent en CI à chaque push (`.github/workflows/validate.yml`). Pour les lancer à la main : `python3 tools/validate_kit.py`, `python3 tools/test_hooks.py` puis `python3 tools/test_cloud_audit.py`.
+Les mêmes vérifications tournent en CI à chaque push (`.github/workflows/validate.yml`), avec en plus le scan SkillSpector. Pour les lancer à la main : `python3 tools/validate_kit.py`, `python3 tools/test_hooks.py`, `python3 tools/test_cloud_audit.py`, `python3 tools/test_security.py`, puis `python3 tools/scan_skills.py` si SkillSpector est installé.
+
+Si vous modifiez un skill et que le scan signale un constat, corrigez le skill ; si c'est un faux positif, ajoutez une règle ciblée avec sa raison dans `tools/skillspector/<skill>.yaml`.

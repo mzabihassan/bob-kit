@@ -1,0 +1,6 @@
+# Justified SkillSpector suppressions for skills/web-accessibility-eu-fr (see README, section Sécurité).
+version: 2
+rules:
+  - id: "LP3"
+    path: "SKILL.md"
+    reason: "Bob Shell does not read allowed-tools/permissions from the front matter: tool access comes from the Bob mode and its approvals. The scripts only read the analysed repositories (tools/test_security.py)."

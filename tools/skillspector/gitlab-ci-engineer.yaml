@@ -1,0 +1,22 @@
+# Justified SkillSpector suppressions for skills/gitlab-ci-engineer (see README, section Sécurité).
+version: 2
+rules:
+  - id: "PE3"
+    path: "security-governance.md"
+    message: ".npmrc"
+    reason: "Guidance to keep .npmrc/settings.xml credentials in masked, protected file-type CI variables."
+  - id: "PE3"
+    path: "security-governance.md"
+    message: "kubeconfig"
+    reason: "Guidance to keep kubeconfigs in protected CI variables, never in the repository."
+  - id: "PE3"
+    path: "troubleshooting.md"
+    message: ".npmrc"
+    reason: "Troubleshooting row for registry 401/403: check the credential variable, never print it."
+  - id: "SC2"
+    path: "security-governance.md"
+    message: "curl * | bash"
+    reason: "Prohibition: no curl | bash of unpinned scripts in pipelines."
+  - id: "RP1"
+    path: "SKILL.md"
+    reason: "Parser limit: the docker run example starts with options (-v), read as the image; the image is pinned by digest (<image>@sha256:<digest>)."
