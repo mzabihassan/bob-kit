@@ -90,101 +90,215 @@ Certains skills ne sont proposés que dans un mode, grâce au champ `groups` de 
 
 ### Exemples de prompts
 
-Écrivez votre demande normalement : Bob choisit le skill d'après sa description. Un bon prompt nomme la cible (dossiers, fichiers, commit, MR, rapport), la langue des livrables et les limites (lecture seule, pas de commit, pas de publication) : chaque question que Bob doit poser coûte un tour. Les exemples ci-dessous sont en anglais et Bob répond dans la langue du prompt ; remplacez les noms (`payments-api`, `payments-ui`, `!482`…) par les vôtres.
+Chaque exemple suit la même structure, tirée des recommandations d'IBM pour Bob (une consigne directe, du contexte, un périmètre précis, ce que Bob doit faire et ne pas faire, le format attendu) :
 
-**[angular2-developer](skills/angular2-developer/SKILL.md)** : une fonctionnalité dans une application existante, dans le style du projet.
+| Champ | Contenu |
+| --- | --- |
+| `Task` | Une seule consigne directe, avec son objectif. Une tâche Bob par objectif : ouvrez une nouvelle tâche (**+**) pour le sujet suivant. |
+| `Context` | La situation et les faits que Bob ne peut pas deviner : versions, environnement, ticket, symptômes, contraintes métier. |
+| `Inputs` | Ce que le skill doit lire : fichiers, dépôts, rapports, URL, commit ou MR. Mentionnez avec `@` les fichiers courts à lire en entier (`@/src/app/x.ts`) ; donnez seulement le chemin des gros rapports et des logs, que le skill lit de façon ciblée. |
+| `Access` | Ce que Bob peut utiliser au-delà des fichiers (CLI, cluster, serveur MCP), en lecture seule ou non. |
+| `Constraints` | Ce que Bob doit faire et ne pas faire : lecture seule, pas de commit, pas de publication, approbations, limites de version. |
+| `Deliverables` | Ce que vous attendez, sous quelle forme et où l'écrire. |
+| `Language` | La langue des livrables (et du code s'il y a lieu). |
+
+Ajoutez au besoin des champs propres à la tâche : `Scope` (pages, modules, environnements), `Requirements` ou `Expected behaviour` (critères d'acceptation), `Focus` (points à examiner en priorité), `Output folder`.
+
+Plus le prompt est complet, moins Bob pose de questions, et chaque question coûte un tour. Supprimez les champs sans objet et remplacez les valeurs d'exemple (`payments-api`, `!482`, URL, chemins) par les vôtres. Le mode indiqué est celui à choisir avant d'envoyer le prompt : **Agent** est le mode intégré de Bob qui modifie et exécute ; `tech-lead-reviewer`, `security-remediator` et `tech-writer` sont les [modes du kit](modes/README.md).
+
+**[angular2-developer](skills/angular2-developer/SKILL.md)** : une fonctionnalité dans une application existante, dans le style du projet. Mode : **Agent**.
 ```text
-Add a paginated, sortable transactions table to the account detail page (src/app/accounts/account-detail), fed by GET /api/accounts/{id}/transactions. Follow the project's existing components, state management and test style, add unit tests and run them. Do not commit.
+Task: Add a paginated, sortable transactions table to the account detail page.
+Context: Angular application of this workspace. The backend endpoint already exists: GET /api/accounts/{id}/transactions?page=&size=&sort= returns { content: Transaction[], totalElements: number }.
+Inputs: @/src/app/accounts/account-detail/account-detail.component.ts and @/src/app/accounts/models/transaction.ts
+Requirements: 20 rows per page; sort by date (default, newest first) and by amount; loading, empty and error states; accessible table.
+Constraints: follow the project's existing components, state management, UI library and test style; no new dependency; do not commit.
+Deliverables: the code changes, unit tests for the new behaviour run and passing, and a short summary of the changes.
+Language: code and comments in English; summary in English.
 ```
 
-**[react-developer](skills/react-developer/SKILL.md)** : une montée de version de React.
+**[react-developer](skills/react-developer/SKILL.md)** : une montée de version de React. Mode : **Agent**.
 ```text
-Upgrade this app from React 18 to React 19: run the official codemods, fix the type errors and the removed APIs, then run the build and the tests. List what changed and what still needs a manual check. Do not commit.
+Task: Upgrade this application from React 18 to the latest React 19.
+Context: Vite + TypeScript single-page application; current versions in @/package.json. Tests run with Vitest.
+Steps: run the official React 19 codemods, fix the type errors and the removed APIs, then run npm run build and npm test.
+Constraints: upgrade only React, React DOM and their types, plus what React 19 strictly requires (ask me before any other upgrade); do not commit.
+Deliverables: the changes, the build and test results, the list of what changed and of what still needs a manual check in the browser.
+Language: English.
 ```
 
-**[spring-boot-developer](skills/spring-boot-developer/SKILL.md)** : un bug sur un flux financier, reproduit avant d'être corrigé.
+**[spring-boot-developer](skills/spring-boot-developer/SKILL.md)** : un bug sur un flux financier, reproduit avant d'être corrigé. Mode : **Agent**.
 ```text
-Bug PAY-1432: POST /api/transfers sometimes debits the account twice when the client retries after a timeout. Reproduce it with a test, fix it with the smallest safe change, run the module's tests and give me the technical report. Do not commit.
+Task: Fix bug PAY-1432: a transfer is sometimes debited twice.
+Context: POST /api/transfers debits the account twice when the client retries after a timeout. Clients send an Idempotency-Key header that the service ignores. Production runs 3 replicas on PostgreSQL 15.
+Inputs: @/src/main/java/com/acme/payments/transfer/TransferController.java and @/src/main/java/com/acme/payments/transfer/TransferService.java
+Expected behaviour: a retry with the same Idempotency-Key returns the original result without a second debit, also when two replicas receive the retries at the same time.
+Constraints: reproduce with a failing test first (Testcontainers, as in the project); smallest safe change, with a Flyway migration if a table or a constraint is needed; ask me before changing the public API; do not commit.
+Deliverables: the test and the fix, the module tests run, and the technical report (cause, fix, risks, deployment notes).
+Language: code in English; report in French.
 ```
 
-**[sonarqube-java-angular](skills/sonarqube-java-angular/SKILL.md)** : un Quality Gate en échec sur la couverture.
+**[sonarqube-java-angular](skills/sonarqube-java-angular/SKILL.md)** : un Quality Gate en échec sur la couverture. Mode : **Agent**.
 ```text
-The SonarQube Quality Gate fails on new code coverage (62% instead of 80%) in payments-api and payments-ui. Use the existing reports target/site/jacoco/jacoco.xml and coverage/lcov.info, rank the quickest real coverage gains, write the tests for the top five and report the coverage before and after.
+Task: Make the SonarQube Quality Gate pass on coverage on new code.
+Context: gate condition "Coverage on New Code >= 80%", currently 62%, on payments-api (Java 21, Maven, JaCoCo) and payments-ui (Angular, LCOV). New code is the code changed since the tag v2.3.0.
+Inputs: payments-api/target/site/jacoco/jacoco.xml and payments-ui/coverage/lcov.info (generated today); no SonarQube API access.
+Constraints: only tests with meaningful assertions, following the existing test style; no coverage exclusions; no production code change except a small testability fix that you ask me first; do not commit.
+Deliverables: the ranked list of the quickest real gains, the tests for the top five, the coverage before and after measured by rerunning the tests of the touched modules.
+Language: English.
 ```
 
-**[security-findings-remediation](skills/security-findings-remediation/SKILL.md)** : une release bloquée par Nexus IQ. À lancer dans le mode [security-remediator](modes/README.md), le seul où ce skill est proposé.
+**[security-findings-remediation](skills/security-findings-remediation/SKILL.md)** : une release bloquée par Nexus IQ. Mode : **`security-remediator`**, le seul où ce skill est proposé.
 ```text
-The release is blocked by Nexus IQ: the policy report is in reports/nexus-iq-payments-api.json. Triage the violations, fix the reachable ones with the smallest dependency upgrades (ask me before any major upgrade), draft waiver justifications for the rest and tell me what to rescan.
+Task: Unblock the payments-api release blocked by Nexus IQ.
+Context: the policy evaluation fails at the release stage on Security-High and License policies. Java 21, Spring Boot 3.3, Maven.
+Inputs: the latest policy report in reports/nexus-iq-payments-api.json; the blocking thresholds in the nexus-iq job of @/.gitlab-ci.yml
+Constraints: fix the reachable violations with the smallest upgrades (patch or minor; ask me before any major upgrade); never lower a policy or exclude a component; run the build and the tests after each upgrade; do not commit.
+Deliverables: the triage table (fix, not exploitable, false positive, decision needed), the dependency changes, a waiver justification with an expiry date for each remaining violation, and what to rescan.
+Language: English.
 ```
 
-**[gitlab-ci-engineer](skills/gitlab-ci-engineer/SKILL.md)** : un pipeline en échec.
+**[gitlab-ci-engineer](skills/gitlab-ci-engineer/SKILL.md)** : un pipeline en échec. Mode : **Agent**.
 ```text
-Pipeline https://gitlab.example.com/pay/payments-api/-/pipelines/48211 fails in the integration-test job since this morning. Find the first real error in the job log, explain the cause and propose the minimal fix. Do not modify the central templates and do not skip any security job.
+Task: Find why the integration-test job fails and propose the minimal fix.
+Context: pipeline https://gitlab.example.com/pay/payments-api/-/pipelines/48211 fails in integration-test since this morning; the same job passed yesterday on the same branch. The pipeline includes the central templates of pay/ci-templates.
+Inputs: the job log saved in logs/integration-test-48211.log (glab is not configured) and @/.gitlab-ci.yml
+Constraints: start from the first real error, not the last line; do not modify the central templates (if the cause is there, write the change to propose to their owners); never skip, disable or allow_failure a job; do not commit or push.
+Deliverables: the cause with the log lines that prove it, the minimal fix as a diff, and how to verify it.
+Language: English.
 ```
 
-**[sql-database-engineer](skills/sql-database-engineer/SKILL.md)** : une requête lente en production.
+**[sql-database-engineer](skills/sql-database-engineer/SKILL.md)** : une requête lente en production. Mode : **Agent**.
 ```text
-The account statement query takes 12 s in production on PostgreSQL 15: the SQL is in TransactionRepository.findStatement and the EXPLAIN (ANALYZE, BUFFERS) output is in docs/perf/statement-plan.txt. Explain the plan, propose the index or the rewrite, and write the Flyway migration that creates the index without blocking writes.
+Task: Make the account statement query fast again.
+Context: PostgreSQL 15; the transactions table holds about 80 million rows. The query takes 12 s in production; target under 300 ms. Flyway migrations are in src/main/resources/db/migration.
+Inputs: the query in @/src/main/java/com/acme/payments/statement/TransactionRepository.java (method findStatement) and the production plan in @/docs/perf/statement-plan.txt (EXPLAIN (ANALYZE, BUFFERS))
+Constraints: no access to the databases; keep the query's results identical; any index must be created without blocking writes; do not commit.
+Deliverables: the plan explained, the chosen index or rewrite with its expected gain and cost, the Flyway migration, and how to verify it on staging.
+Language: English.
 ```
 
-**[argocd-gitops](skills/argocd-gitops/SKILL.md)** : une application Argo CD dégradée après une promotion.
+**[argocd-gitops](skills/argocd-gitops/SKILL.md)** : une application Argo CD dégradée après une promotion. Mode : **Agent**.
 ```text
-The Argo CD application payments-api-prod has been OutOfSync and Degraded since the last promotion. Find the cause with read-only argocd and kubectl commands, then propose the fix as a change in the GitOps repository. No change on the cluster.
+Task: Find why the Argo CD application payments-api-prod is OutOfSync and Degraded since the last promotion, and propose the fix.
+Context: the GitOps repository is ./payments-deploy (Helm chart charts/payments-api, values-prod.yaml); CI promotes by bumping the image tag in the values file.
+Access: argocd and kubectl are logged in with read-only rights on the namespace payments-prod.
+Constraints: read-only commands only (argocd app get, diff, history; kubectl get, describe, logs, events); no sync, rollback or change on the cluster; the fix is a change in the GitOps repository, not committed.
+Deliverables: the cause with its evidence, the Git change and its rendered diff, the expected effect of the sync, and the rollback plan.
+Language: English.
 ```
 
-**[ibm-cloud-platform](skills/ibm-cloud-platform/SKILL.md)** : sortir un secret de Git vers Secrets Manager.
+**[ibm-cloud-platform](skills/ibm-cloud-platform/SKILL.md)** : sortir un secret de Git vers Secrets Manager. Mode : **Agent**.
 ```text
-Our Spring Boot app on Red Hat OpenShift on IBM Cloud reads its database password from a Kubernetes Secret committed in Git. Propose how to move it to Secrets Manager (IAM, service ID or trusted profile, private endpoint) and write the Terraform changes in infra/ibm. Read-only on the account: do not apply anything.
+Task: Move the database password of payments-api from a Kubernetes Secret committed in Git to IBM Cloud Secrets Manager.
+Context: enterprise account; Red Hat OpenShift on IBM Cloud, region eu-de, resource group payments-prod. The Secrets Manager instance payments-sm exists. Terraform is in infra/ibm, with its state in the Schematics workspace payments-prod.
+Access: the ibmcloud CLI is logged in with read-only roles.
+Constraints: read-only on the account (no terraform apply, no Schematics apply); least privilege (trusted profile or service ID); private endpoints only; do not commit.
+Deliverables: the target design (how the secret reaches the pods, IAM, network), the Terraform changes, the migration and rollback steps, and how to remove the secret from the Git history.
+Language: English.
 ```
 
-**[merge-request-review](skills/merge-request-review/SKILL.md)** : la revue d'une MR. Sans cible, le skill revoit les changements locaux, puis la branche courante.
+**[merge-request-review](skills/merge-request-review/SKILL.md)** : la revue d'une MR. Sans cible, le skill revoit les changements locaux, puis la branche courante. Mode : **`tech-lead-reviewer`** (ou **Agent**).
 ```text
-Review !482 in payments-api. Focus on data integrity, security and API backward compatibility, and check suspected bugs with a test in a separate worktree. Do not post anything on GitLab.
+Task: Review merge request !482 of payments-api.
+Context: the MR adds partial refunds; the business rules are in the ticket linked from the MR. It targets main and includes a database migration.
+Access: glab is logged in (read only).
+Focus: data integrity and transactions, security, backward compatibility of the public API and of the database migration.
+Constraints: check suspected bugs with a test in a separate worktree (never change my working tree); do not post anything on GitLab.
+Deliverables: the review: verdict, findings ranked by severity with file:line, failure scenario, suggested fix and verified or suspected status, questions for the author, what is good.
+Language: English.
 ```
 
-**[criticize-me](skills/criticize-me/SKILL.md)** : l'autocritique d'un commit avant de le montrer. Le commit est obligatoire.
+**[criticize-me](skills/criticize-me/SKILL.md)** : l'autocritique d'un commit avant de le montrer. Le commit est obligatoire. Mode : **`tech-lead-reviewer`** (ou **Agent**).
 ```text
-Criticize commit 3f9c2ab. I want every real weakness before my team sees it.
+Task: Criticize my last commit (HEAD) before I open the merge request.
+Context: it adds a retry queue for failed transfer notifications (ticket PAY-1520).
+Constraints: read-only; you may run the related unit tests; do not publish anything.
+Deliverables: the critique in the skill's format: verdict, findings ranked by severity with evidence, the weakest decision, the questions I must be able to answer.
+Language: English.
 ```
 
-**[defend-me](skills/defend-me/SKILL.md)** : préparer la défense d'un commit avant une revue ou un CAB. Le commit est obligatoire.
+**[defend-me](skills/defend-me/SKILL.md)** : préparer la défense d'un commit avant une revue ou un CAB. Le commit est obligatoire. Mode : **`tech-lead-reviewer`** (ou **Agent**).
 ```text
-Defend HEAD for tomorrow's architecture review: the reviewers will ask why I added a retry queue instead of reusing the existing scheduler. Prepare the rebuttals, the quick fixes worth doing before the review and the MR description.
+Task: Prepare the defence of my last commit (HEAD) for tomorrow's architecture review.
+Context: the commit adds a retry queue (a table and a poller) for failed transfer notifications instead of reusing the existing Quartz scheduler, because notifications must survive restarts and be sent by a single replica.
+Objections to answer: "Why not reuse Quartz?", "Is the poller safe with 3 replicas?", "Why a new table?"
+Constraints: no invented evidence; do not modify the code or commit.
+Deliverables: each objection rebutted, mitigated or conceded with its evidence, the quick fixes worth doing before the review, and the MR description.
+Language: English.
 ```
 
-**[confluence-documentation](skills/confluence-documentation/SKILL.md)** : un runbook écrit à partir du code, en brouillon.
+**[confluence-documentation](skills/confluence-documentation/SKILL.md)** : un runbook écrit à partir du code, en brouillon. Mode : **`tech-writer`**.
 ```text
-Write the runbook of the payments-api monthly statement batch (MonthlyStatementJob, its Helm values and alerts) for the PAY space, under Operations > Runbooks, in English. Look for an existing page first. Draft only: do not publish.
+Task: Write the runbook of the payments-api monthly statement batch.
+Context: Confluence Cloud, space PAY, parent page Operations > Runbooks; readers are the on-call engineers.
+Inputs: @/payments-api/src/main/java/com/acme/payments/statement/MonthlyStatementJob.java, the CronJob section of payments-deploy/charts/payments-api/values-prod.yaml and the alert rules in payments-deploy/alerts/statement.yaml
+Access: the Atlassian MCP server is configured; search for an existing page before writing.
+Constraints: every statement traceable to a source; no secret values; do not publish.
+Deliverables: the draft page in docs/runbooks/monthly-statement.md, and whether to update an existing page or create a new one.
+Language: English (the language of the PAY space).
 ```
 
-**[design-system](skills/design-system/SKILL.md)** : l'audit du design system réel d'un frontend.
+**[design-system](skills/design-system/SKILL.md)** : l'audit du design system réel d'un frontend. Mode : **Agent**.
 ```text
-Extract and audit the real design system of the Angular portal (sources in apps/portal/src and libs/ui). I want the palette with its near-duplicates, the WCAG contrast failures and a prioritised plan to move to design tokens. Write the deliverables in docs/design-system, in French.
+Task: Extract and audit the real design system of the Angular portal.
+Context: Nx monorepo; the portal uses Angular Material and SCSS; there are no brand guidelines and no Figma library.
+Inputs: sources in apps/portal/src and libs/ui; exclude generated and third-party code.
+Constraints: read-only on the sources.
+Deliverables: in docs/design-system: the report (palette with near-duplicates, typography, spacing, token coverage, WCAG contrast failures), the palette preview, the draft tokens and a prioritised migration plan to design tokens.
+Language: French.
 ```
 
-**[web-accessibility-eu-fr](skills/web-accessibility-eu-fr/SKILL.md)** : l'audit RGAA d'un parcours.
+**[web-accessibility-eu-fr](skills/web-accessibility-eu-fr/SKILL.md)** : l'audit RGAA d'un parcours. Mode : **Agent**.
 ```text
-Audit the accessibility of the account opening journey (/open-account, four steps, desktop and mobile) against RGAA 4.1.2. Use axe-core through the project's Playwright tests if available, then the manual checks. Read-only: write the report in docs/a11y, in French.
+Task: Audit the accessibility of the account opening journey.
+Context: public online service of a French bank, covered by the European Accessibility Act; reference RGAA 4.1.2. Angular 18 with Angular Material; the project has Playwright end-to-end tests with @axe-core/playwright.
+Scope: /open-account and its four steps, including the error states, at 1280 px and 375 px wide.
+Constraints: audit only (no code change); run the application locally and the axe scans; keep the raw results outside the source tree.
+Deliverables: the report in docs/a11y/open-account: findings by priority mapped to the RGAA and WCAG criteria, the manual checks done and not done, and the prioritised fixes.
+Language: French.
 ```
 
-**[release-change-management](skills/release-change-management/SKILL.md)** : les documents d'une release, à partir des vrais changements.
+**[release-change-management](skills/release-change-management/SKILL.md)** : les documents d'une release, à partir des vrais changements. Mode : **Agent**.
 ```text
-Prepare release 2.4.0 of payments-api from tag v2.3.0 to main: technical changelog, business release notes in French, version proposal, and the ServiceNow change request with risk, rollback plan and deployment runbook for the Saturday 22:00 window. Do not create the tag.
+Task: Prepare release 2.4.0 of payments-api.
+Context: range v2.3.0..main; production deployment on Saturday from 22:00 to 23:00 (Europe/Paris); use the templates in docs/release-templates if they exist.
+Constraints: every statement traced to commits or merge requests; do not create the tag; do not submit the change request.
+Deliverables: in docs/releases/2.4.0: version proposal, technical changelog, business release notes, ServiceNow change request (impact, risk, rollback plan), deployment runbook and go/no-go checklist.
+Language: English, except the business release notes in French.
 ```
 
-**[production-incident-investigation](skills/production-incident-investigation/SKILL.md)** : un incident de production en cours.
+**[production-incident-investigation](skills/production-incident-investigation/SKILL.md)** : un incident de production en cours. Mode : **Agent**.
 ```text
-Incident in progress: since 14:05 UTC about 30% of payment requests fail with HTTP 504 on payments-api in production. I am the incident commander. Help me find what changed and test hypotheses with read-only commands, propose mitigations with their risk, and keep a UTC timeline.
+Task: Help me investigate an ongoing production incident.
+Context: since 14:05 UTC about 30% of payment requests fail with HTTP 504 on payments-api in production (namespace payments-prod, 3 pods). Severity SEV2. I am the incident commander; I post a status update every 30 minutes in the #inc-payments channel.
+Access: kubectl and argocd with read-only rights.
+Constraints: read-only commands only; propose mitigations with their risk and reversibility; execute nothing that changes production without my explicit approval.
+Deliverables: what changed, the hypotheses ranked and tested, the mitigations, a UTC timeline, and the draft of the next status update.
+Language: English.
 ```
 
-**[project-playbook-java-angular](skills/project-playbook-java-angular/SKILL.md)** : le playbook d'onboarding de deux dépôts séparés, à coller dans Confluence. Ouvrez Bob dans le dossier qui contient les deux dépôts.
+**[project-playbook-java-angular](skills/project-playbook-java-angular/SKILL.md)** : le playbook d'onboarding de deux dépôts séparés, à coller dans Confluence. Ouvrez Bob dans le dossier qui contient les deux dépôts. Mode : **Agent** (les scripts du skill doivent pouvoir s'exécuter).
 ```text
-Generate the Confluence developer onboarding playbook for the payments application: backend ./payments-api (Spring Boot) and frontend ./payments-ui (Angular), two separate repositories. Language: English. Output folder: payments-api/docs/playbook. Do not run builds or tests, do not publish to Confluence, do not commit.
+Task: Generate the Confluence developer onboarding playbook of the payments application.
+Context: two separate repositories in this folder: ./payments-api (Spring Boot backend) and ./payments-ui (Angular frontend). No playbook exists yet.
+Output folder: payments-api/docs/playbook
+Source links: payments-api=https://gitlab.example.com/pay/payments-api/-/blob/main, payments-ui=https://gitlab.example.com/pay/payments-ui/-/blob/main
+Constraints: do not run builds or tests; do not publish to Confluence; do not commit.
+Deliverables: the playbook pages and the HTML preview to copy and paste into Confluence Cloud.
+Language: English.
 ```
 
-**[cloud-migration-audit-java-angular](skills/cloud-migration-audit-java-angular/SKILL.md)** : l'audit de migration vers Kubernetes, avec la décision GO / CONDITIONAL GO / NO-GO. Ouvrez Bob dans le dossier qui contient les trois dépôts.
+**[cloud-migration-audit-java-angular](skills/cloud-migration-audit-java-angular/SKILL.md)** : l'audit de migration vers Kubernetes, avec la décision GO / CONDITIONAL GO / NO-GO. Ouvrez Bob dans le dossier qui contient les trois dépôts. Mode : **Agent** (le skill exécute ses scripts et lance des sous-agents).
 ```text
-Audit the cloud migration of the payments application: backend ./payments-api, frontend ./payments-ui, CD/infrastructure ./payments-deploy (Helm, Argo CD, GitLab CI). Repositories only, no live access. Write the reports in English to ./cloud-migration-audit.
+Task: Audit the cloud migration of the payments application.
+Context: the application moved from two on-premise Tomcat servers to Kubernetes on IBM Cloud (Helm, Argo CD, GitLab CI, JFrog).
+Repositories: backend ./payments-api, frontend ./payments-ui, CD/infrastructure ./payments-deploy
+Access: repositories only, no live access.
+Output folder: ./cloud-migration-audit
+Constraints: read-only on the repositories; do not build them or run their scripts.
+Deliverables: the five reports (Markdown report, HTML dashboard, findings JSON, action plan, checklist) and the GO / CONDITIONAL GO / NO-GO decision with its reasons.
+Language: English.
 ```
 
 ### Économiser des bobcoins
@@ -234,7 +348,7 @@ pip install "skillspector @ git+https://github.com/NVIDIA/SkillSpector@v2.13.0"
 python3 tools/scan_skills.py --out skillspector-reports
 ```
 
-Le script scanne chaque skill séparément avec sa baseline `tools/skillspector/<skill>.yaml` (SkillSpector n'accepte pas de baseline dans un scan récursif), affiche le score, les constats actifs, les constats justifiés et la couverture de chaque skill, et échoue sur tout constat qu'aucune baseline ne justifie. Il signale aussi les règles qui ne correspondent plus à rien, pour qu'une baseline ne masque jamais plus que nécessaire. Le job `skillspector` de la CI fait la même chose à chaque push et conserve les rapports JSON.
+Le script scanne chaque skill séparément avec sa baseline `tools/skillspector/<skill>.yaml` (SkillSpector n'accepte pas de baseline dans un scan récursif), affiche le score, les constats actifs, les constats justifiés et la couverture de chaque skill, et échoue sur tout constat qu'aucune baseline ne justifie. Il signale aussi les règles qui ne correspondent plus à rien, pour qu'une baseline ne masque jamais plus que nécessaire.
 
 Résultats avec SkillSpector v2.13.0 en `--no-llm` sur les 19 skills :
 
