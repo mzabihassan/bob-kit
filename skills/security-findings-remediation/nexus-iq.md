@@ -23,7 +23,7 @@
    - Spring Boot BOM imported without the parent: add a `dependencyManagement` entry **before** the BOM import.
    - Gradle: the dependency-management plugin's `ext['<property>']`, or `constraints { implementation('g:a:v') }` / platforms.
    - npm: `overrides` (npm ≥ 8.3), Yarn `resolutions`, pnpm `overrides`. Angular packages are upgraded with `ng update`, not overrides.
-5. **Remove unused dependencies** (`./mvnw dependency:analyze`, `npx depcheck`): the cheapest fix of all, when confirmed.
+5. **Remove unused dependencies** (`./mvnw dependency:analyze`, `npx depcheck@1.4.7`): the cheapest fix of all, when confirmed.
 6. **Replace the component** when it is unmaintained or no fixed version exists.
 
 After any version change: full build, tests and an application smoke test. Read the release notes for anything beyond a patch version, and never jump a major version without agreement.

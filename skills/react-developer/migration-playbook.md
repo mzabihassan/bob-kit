@@ -20,7 +20,7 @@ Respect the project's upgrade policy. Never commit or push unless the user expli
 
 1. Upgrade to **18.3** first and fix every deprecation warning.
 2. Upgrade `react`, `react-dom`, `@types/react`, `@types/react-dom` together, plus libraries requiring it.
-3. Run the codemods: `npx codemod@latest react/19/migration-recipe` (render APIs, string refs, legacy context…) and `npx types-react-codemod@latest preset-19 ./src` for type changes. Review every change.
+3. Run the codemods, pinned (raise the versions deliberately, after checking the React upgrade guide): `npx codemod@1.18.6 react/19/migration-recipe` (render APIs, string refs, legacy context…) and `npx types-react-codemod@3.5.3 preset-19 ./src` for type changes. Review every change.
 4. Pitfalls:
    - **`defaultProps` on function components is silently ignored**: props become `undefined`. Convert to default parameters (search the code base, including libraries you own).
    - `propTypes` checks no longer run: rely on TypeScript.

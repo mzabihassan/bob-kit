@@ -8,7 +8,7 @@ Method: reproduce → read the exact error code (`https://angular.dev/errors/NG0
 | --- | --- |
 | `ERESOLVE` peer dependency conflict | Find a library version supporting the target Angular. `--force`/`--legacy-peer-deps` only with user approval, documented |
 | "Repository is not clean" | Ask the user to commit or stash; never discard or commit for them |
-| Wrong CLI version used | Use `npx ng …` (local CLI) |
+| Wrong CLI version used | Use `npx --no -- ng …` (local CLI) |
 | Node or TypeScript not supported | Align with https://angular.dev/reference/versions (v22: Node ≥ 22.12, TS 6) |
 
 ## Compiler and template
@@ -48,7 +48,7 @@ Method: reproduce → read the exact error code (`https://angular.dev/errors/NG0
 
 ## Bundle size
 
-Budget exceeded: `ng build --stats-json`, inspect with `npx esbuild-visualizer` or `source-map-explorer`, lazy load heavy libraries. Fix CommonJS warnings with ESM alternatives; use `allowedCommonJsDependencies` only with justification.
+Budget exceeded: `ng build --stats-json`, inspect with `npx esbuild-visualizer@0.7.0` (pinned) or `source-map-explorer`, lazy load heavy libraries. Fix CommonJS warnings with ESM alternatives; use `allowedCommonJsDependencies` only with justification.
 
 ## Stuck
 

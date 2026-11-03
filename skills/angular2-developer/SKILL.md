@@ -15,7 +15,7 @@ Precedence: user request > project instructions > conventions observed in the co
 </Step>
 
 <Step>
-Establish the technical baseline from `package.json`/lockfile and the bootstrap file: exact versions of `@angular/core`, CLI, TypeScript, RxJS, Zone.js, Material/CDK and Angular libraries (NgRx, PrimeNG, Nx, Ionic…); NgModule vs standalone; zone vs zoneless; SSR; builder; test runner. Run `npx ng version` when a terminal is available. Summarise the baseline and the key conventions in at most five lines. If the project is below v18, say it is outside this skill's scope and propose upgrading to v18 first.
+Establish the technical baseline from `package.json`/lockfile and the bootstrap file: exact versions of `@angular/core`, CLI, TypeScript, RxJS, Zone.js, Material/CDK and Angular libraries (NgRx, PrimeNG, Nx, Ionic…); NgModule vs standalone; zone vs zoneless; SSR; builder; test runner. Run `npx --no -- ng version` when a terminal is available. Summarise the baseline and the key conventions in at most five lines. If the project is below v18, say it is outside this skill's scope and propose upgrading to v18 first.
 </Step>
 
 <Step>
@@ -46,6 +46,7 @@ Validate, then report: run the production build, unit tests and lint if configur
 Always:
 - Never run `git commit`, `git push`, or open a PR unless the user explicitly asks in the current conversation. Leave changes uncommitted for the user to review.
 - Upgrade one major at a time with `ng update`; never hand-edit Angular versions.
+- Run the project's CLI with `npx --no -- ng …`: in agents and CI (no terminal) a plain `npx` call downloads missing packages on its own, and the npm package `ng` is not the Angular CLI.
 - When unsure an API exists or is stable, check `node_modules/@angular/*` typings, https://angular.dev or https://angular.dev/update-guide.
 - Never hardcode secrets, tokens or environment URLs.
 - Do not create or rewrite `AGENTS.md`/rule files unless asked.

@@ -20,7 +20,7 @@ You are a senior build and release engineer. Pipelines are shared production inf
 </Step>
 
 <Step>
-**For a failure: reproduce from the logs.** Get the job log (UI, `glab ci trace <job>`, or the jobs API) and find the **first** real error, not the last line. Classify it: code or test, flaky test, dependency or registry, configuration or rules, permissions or tokens, runner or infrastructure (OOM `exit code 137`, disk, timeout, no matching runner), security gate. Then load `troubleshooting.md`. Reproduce locally with the same image and command when it is code- or build-related (`docker run --rm -v "$PWD":/w -w /w <image> <script>`).
+**For a failure: reproduce from the logs.** Get the job log (UI, `glab ci trace <job>`, or the jobs API) and find the **first** real error, not the last line. Classify it: code or test, flaky test, dependency or registry, configuration or rules, permissions or tokens, runner or infrastructure (OOM `exit code 137`, disk, timeout, no matching runner), security gate. Then load `troubleshooting.md`. Reproduce locally with the same image and command when it is code- or build-related (`docker run -v "$PWD":/w -w /w --rm <image>@sha256:<digest> <script>`, with the digest the job log prints, so the exact CI image runs).
 </Step>
 
 <Step>

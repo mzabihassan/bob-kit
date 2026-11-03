@@ -4,7 +4,7 @@ For version upgrades and pattern migrations (standalone, control flow, signals, 
 
 ## 1. Pre-flight (never skip)
 
-1. Record `npx ng version`, `node -v`, current branch. `ng update` needs a clean working tree: if it is dirty, ask the user to commit or stash (never discard, never commit for them).
+1. Record `npx --no -- ng version`, `node -v`, current branch. `ng update` needs a clean working tree: if it is dirty, ask the user to commit or stash (never discard, never commit for them).
 2. Build (`--configuration production`) and tests must pass **before** upgrading. If they already fail, stop and report.
 3. List Angular-dependent libraries (Material/CDK, NgRx, PrimeNG, ngx-*, Nx, Ionic, Storybook, Jest presets…) and confirm each has a release for the target version. Flag blockers first.
 4. Read https://angular.dev/update-guide?v=<from>-<to>&l=3 for each hop and note the manual steps.
@@ -13,8 +13,8 @@ For version upgrades and pattern migrations (standalone, control flow, signals, 
 
 For each N → N+1:
 1. Update Node/TypeScript if the target requires it (https://angular.dev/reference/versions); include CI images, Dockerfiles, `.nvmrc`, `engines`.
-2. `npx ng update @angular/core@<N+1> @angular/cli@<N+1>` (try `--dry-run` first). Nx workspaces: `nx migrate` instead.
-3. `npx ng update @angular/material@<N+1>` and other libraries that follow Angular majors.
+2. `npx --no -- ng update @angular/core@<N+1> @angular/cli@<N+1>` (try `--dry-run` first). Nx workspaces: `nx migrate` instead.
+3. `npx --no -- ng update @angular/material@<N+1>` and other libraries that follow Angular majors.
 4. Review every file the schematics changed and every TODO they inserted.
 5. Build, test, run the app; fix with `troubleshooting.md`.
 6. Stop and report the hop's result with a suggested message (`chore(deps): upgrade Angular to v<N+1>`). The next hop needs a clean tree, so continue only after the user has committed or explicitly asked you to commit.
@@ -34,7 +34,7 @@ After each hop, manually test risk areas: nested routes and params, forms (custo
 
 ## 4. Pattern migrations (official schematics)
 
-Only when asked or in the team's plan; one at a time, after the version upgrade is green. List what the installed version offers with `npx ng g @angular/core: --help`.
+Only when asked or in the team's plan; one at a time, after the version upgrade is green. List what the installed version offers with `npx --no -- ng g @angular/core: --help`.
 
 | Migration | Schematic (`ng g @angular/core:<name>`) |
 | --- | --- |
@@ -72,7 +72,7 @@ Check these before and after each migration; most "it worked before" bugs come f
 
 ### State management
 
-- Upgrade NgRx (or NGXS, Akita/Elf) to the release matching the Angular major in the same hop: `npx ng update @ngrx/store@<N>`. Standalone apps: `StoreModule.forRoot` → `provideStore`, `EffectsModule` → `provideEffects`, feature state via route `providers`.
+- Upgrade NgRx (or NGXS, Akita/Elf) to the release matching the Angular major in the same hop: `npx --no -- ng update @ngrx/store@<N>`. Standalone apps: `StoreModule.forRoot` → `provideStore`, `EffectsModule` → `provideEffects`, feature state via route `providers`.
 - Don't create two sources of truth: read the store with `store.selectSignal()` instead of copying store state into local signals. An `effect()` that dispatches an action which updates the state it reads loops.
 - `BehaviorSubject` services → signals: keep the public API stable during the transition (expose `toObservable(state)` or keep the observable getter) so existing subscribers don't break; migrate consumers afterwards.
 - NgRx SignalStore: update only through `patchState` with new objects; keep `withMethods` side effects out of `withComputed`.
