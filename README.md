@@ -207,17 +207,7 @@ Bob renvoie à chaque requête tout son contexte (prompt système, définitions 
 | Pro+ | 60 $ | 180 | 0,33 $ | 0,67 $ |
 | Ultra | 200 $ | 1 000 | 0,20 $ | 0,40 $ |
 
-#### Bob et Claude Code : deux logiques de facturation
-
-| | IBM Bob | Claude Code |
-| --- | --- | --- |
-| Ce que vous payez | Un abonnement avec un stock de bobcoins par mois, puis un dépassement optionnel | Un abonnement avec des limites d'usage (par fenêtre de 5 heures et par semaine), ou l'API à l'usage |
-| Abonnements | Pro 20 $, Pro+ 60 $, Ultra 200 $ | Pro 20 $, Max à partir de 100 $ |
-| Prix d'un million de tokens d'entrée | ≈ 0,40 à 0,80 $ selon l'offre | API : 2 $ (Sonnet 5.5) ou 4 $ (Opus 5.5) |
-| Contexte renvoyé à chaque tour | Refacturé au même tarif | API : relu depuis le cache à 0,20 $ le million |
-| Choix du modèle | Automatique (Bob choisit) | Au choix |
-
-Dans les deux cas, réduire le contexte et le nombre de tours reste le levier principal. Prix relevés en octobre 2026 sur [bob.ibm.com/pricing](https://bob.ibm.com/pricing) et [claude.com/pricing](https://claude.com/pricing) ; le prix des tokens de sortie dans Bob n'est pas publié et n'a pas pu être mesuré.
+Prix relevés en octobre 2026 sur [bob.ibm.com/pricing](https://bob.ibm.com/pricing).
 
 ## Sécurité
 
@@ -234,10 +224,10 @@ Les skills lisent des dépôts qui ne sont pas toujours de confiance (code d'un 
 
 ### Scan des skills avec SkillSpector
 
-[SkillSpector](https://github.com/NVIDIA/SkillSpector) (NVIDIA) analyse les skills d'agents : injection de prompt, exfiltration, commandes dangereuses, dépendances non épinglées, code obfusqué… Le kit l'utilise en mode statique (`--no-llm`) : rien n'est envoyé à un modèle, rien ne quitte la machine. Il faut Python 3.12 ou plus ; la version est épinglée par son commit, comme en CI :
+[SkillSpector](https://github.com/NVIDIA/SkillSpector) (NVIDIA) analyse les skills d'agents : injection de prompt, exfiltration, commandes dangereuses, dépendances non épinglées, code obfusqué… Le kit l'utilise en mode statique (`--no-llm`) : rien n'est envoyé à un modèle, rien ne quitte la machine. Il faut Python 3.12 ou plus. Installez la version v2.13.0, celle qui a servi à établir les baselines (la CI l'installe depuis le commit de ce tag, qui ne peut pas être déplacé) :
 
 ```bash
-pip install "skillspector @ git+https://github.com/NVIDIA/SkillSpector@091a509b3d6ba8ff5be528966e1f43c2e68cf214"
+pip install "skillspector @ git+https://github.com/NVIDIA/SkillSpector@v2.13.0"
 ```
 
 ```bash
@@ -248,7 +238,7 @@ Le script scanne chaque skill séparément avec sa baseline `tools/skillspector/
 
 Résultats avec SkillSpector v2.13.0 en `--no-llm` sur les 19 skills :
 
-| | Avant (commit `740eb7f`) | Après durcissement | Avec les baselines |
+| | Avant le durcissement | Après le durcissement | Avec les baselines |
 | --- | --- | --- | --- |
 | Constats | 66 (29 HIGH, 36 MEDIUM, 1 LOW) | 53 (29 HIGH, 24 MEDIUM) | 0 non justifié, 53 justifiés |
 | Dépendances non épinglées (RP1) | 12 | 1 (limite du parseur, image épinglée par digest) | 0 |
@@ -265,15 +255,3 @@ Les 53 constats restants sont des faux positifs ou des limites du mode statique,
 Une règle de baseline cible un identifiant de règle, un fichier et le texte trouvé (quand le constat en a un), avec une raison obligatoire ; jamais un identifiant seul. Un nouveau constat, même de même type dans un autre fichier, fait donc échouer le scan. Quand vous montez la version de SkillSpector, relancez le scan et revoyez les baselines.
 
 Limites : SkillSpector ne remplace pas la revue. Les trois vulnérabilités corrigées plus haut (fsmonitor, liens symboliques, liens `javascript:`) n'étaient pas détectées par le scanner : elles ont été trouvées en relisant le code. Avant une release, complétez le scan statique par un scan avec LLM (`skillspector scan skills/<skill>` avec un fournisseur configuré, voir `skillspector scan --help`), qui inspecte aussi les fichiers que le mode statique ne couvre qu'en partie ; le contenu des skills est alors envoyé à ce fournisseur.
-
-## Contribuer
-
-Avant chaque commit, la validation du kit et les tests (hooks, moteur de l'audit cloud, sécurité) tournent automatiquement si vous activez le hook git du dépôt (une fois par clone) :
-
-```bash
-git config core.hooksPath tools/git-hooks
-```
-
-Les mêmes vérifications tournent en CI à chaque push (`.github/workflows/validate.yml`), avec en plus le scan SkillSpector. Pour les lancer à la main : `python3 tools/validate_kit.py`, `python3 tools/test_hooks.py`, `python3 tools/test_cloud_audit.py`, `python3 tools/test_security.py`, puis `python3 tools/scan_skills.py` si SkillSpector est installé.
-
-Si vous modifiez un skill et que le scan signale un constat, corrigez le skill ; si c'est un faux positif, ajoutez une règle ciblée avec sa raison dans `tools/skillspector/<skill>.yaml`.
