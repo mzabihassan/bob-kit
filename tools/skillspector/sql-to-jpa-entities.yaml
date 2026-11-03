@@ -1,0 +1,22 @@
+# Justified SkillSpector suppressions for skills/sql-to-jpa-entities (see README, section Sécurité).
+version: 2
+rules:
+  - id: "AE1"
+    path: "SKILL.md"
+    message: "scripts/ddl_parser.py (partial)"
+    reason: "--no-llm only: the deterministic layer stops on the SQL tokenizer's dense patterns (obfuscated_instruction_text / static_parse_limit), the rest of the file is scanned. First-party code, reviewed and tested on Oracle and PostgreSQL scripts; run a full LLM scan before a release."
+  - id: "AE1"
+    path: "SKILL.md"
+    message: "scripts/mapping.py (partial)"
+    reason: "--no-llm only: the deterministic layer stops on the CHECK-constraint regexes (obfuscated_instruction_text), the rest of the file is scanned. First-party code, reviewed and tested; run a full LLM scan before a release."
+  - id: "AE1"
+    path: "SKILL.md"
+    message: "scripts/javagen.py (partial)"
+    reason: "--no-llm only: the Java templates exceed the static parser span (static_parse_limit), the rest of the file is scanned. First-party code; its output was compiled and run against Oracle and PostgreSQL; run a full LLM scan before a release."
+  - id: "RA1"
+    path: "scripts/sql2jpa.py"
+    message: "replace existing file"
+    reason: "Help text of the opt-in --overwrite option, which writes generated Java into the user's project; the skill never modifies itself. Without the option, differing files are kept and the generated version is set aside under --out."
+  - id: "LP3"
+    path: "SKILL.md"
+    reason: "Bob Shell does not read allowed-tools/permissions from the front matter: tool access comes from the Bob mode and its approvals. The scripts read the SQL scripts and write only under --out and --into."
