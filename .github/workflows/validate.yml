@@ -10,7 +10,9 @@ permissions:
 
 jobs:
   validate:
-    runs-on: ubuntu-latest
+    # Python 3.9 is the oldest version the kit supports; setup-python only ships it up to Ubuntu 24.04
+    # (ubuntu-latest moved to 26.04 in October 2026).
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
