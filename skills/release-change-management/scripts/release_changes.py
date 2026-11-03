@@ -43,8 +43,12 @@ RISK_RULES = [
 SEMVER = re.compile(r"^(?P<prefix>[^\d]*)(?P<maj>\d+)\.(?P<min>\d+)\.(?P<pat>\d+)$")
 
 
+# The repository's git config is untrusted: never let it run a command (core.fsmonitor, hooks) or write a lock.
+SAFE_GIT = ["git", "--no-optional-locks", "-c", "core.fsmonitor=false", "-c", "core.hooksPath=/dev/null"]
+
+
 def git(repo, *args):
-    res = subprocess.run(["git", "-C", repo, *args], capture_output=True, text=True)
+    res = subprocess.run([*SAFE_GIT, "-C", repo, *args], capture_output=True, text=True)
     if res.returncode != 0:
         first = (res.stderr.strip().splitlines() or ["unknown error"])[0]
         sys.exit(f"git {args[0]} failed: {first}")

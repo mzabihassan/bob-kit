@@ -133,9 +133,19 @@ def read(path):
         return ""
 
 
+# The audited repository's git config is untrusted: command-line settings override it so that git never runs a command
+# from it (core.fsmonitor, hooks) and never writes to it (optional index locks).
+SAFE_GIT = ["git", "--no-optional-locks", "-c", "core.fsmonitor=false", "-c", "core.hooksPath=/dev/null"]
+
+
+def inside(root, path):
+    """True when path resolves inside root: a symbolic link must not pull in files from elsewhere (keys, configs)."""
+    return os.path.realpath(path).startswith(os.path.realpath(root).rstrip(os.sep) + os.sep)
+
+
 def git(root, *args):
     try:
-        r = subprocess.run(["git", "-C", root, *args], capture_output=True, text=True, timeout=20)
+        r = subprocess.run([*SAFE_GIT, "-C", root, *args], capture_output=True, text=True, timeout=20)
         return r.stdout.strip() if r.returncode == 0 else ""
     except (OSError, subprocess.SubprocessError):
         return ""
@@ -145,7 +155,10 @@ def walk(root):
     for d, dirs, files in os.walk(root):
         dirs[:] = sorted(x for x in dirs if x not in SKIP_DIRS and not (x.startswith(".") and x not in KEEP_DOT_DIRS))
         for f in sorted(files):
-            yield os.path.relpath(os.path.join(d, f), root).replace(os.sep, "/")
+            full = os.path.join(d, f)
+            if os.path.islink(full) and not inside(root, full):
+                continue
+            yield os.path.relpath(full, root).replace(os.sep, "/")
 
 
 def strip_registry(image):

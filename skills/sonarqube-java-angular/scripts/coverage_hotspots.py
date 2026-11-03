@@ -87,8 +87,11 @@ def index_sources(roots):
         for d, dirs, files in os.walk(root):
             dirs[:] = [x for x in dirs if x not in SKIP_DIRS]
             for f in files:
+                p = os.path.join(d, f)
+                if os.path.islink(p) and not os.path.realpath(p).startswith(os.path.realpath(root).rstrip(os.sep) + os.sep):
+                    continue  # a symbolic link must not pull in files from outside the source tree
                 if f.endswith((".java", ".ts")):
-                    idx.setdefault(f, []).append(os.path.join(d, f))
+                    idx.setdefault(f, []).append(p)
     return idx
 
 

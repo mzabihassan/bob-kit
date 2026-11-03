@@ -15,9 +15,18 @@ SKIP = {".git", "node_modules", "target", "build", "dist", ".angular", ".gradle"
 INSTRUCTION_FILES = ["AGENTS.md", "CLAUDE.md", ".bobrules", "CONTRIBUTING.md", ".github/copilot-instructions.md"]
 
 
+# The project's git config may come from an untrusted clone: never let it run a command (core.fsmonitor, hooks)
+# or write an index lock while this hook only reads the state.
+SAFE_GIT = ["git", "--no-optional-locks", "-c", "core.fsmonitor=false", "-c", "core.hooksPath=/dev/null"]
+
+
+def inside(root, path):
+    return os.path.realpath(path).startswith(os.path.realpath(root).rstrip(os.sep) + os.sep)
+
+
 def git(cwd, *args):
     try:
-        r = subprocess.run(["git", "-C", cwd, *args], capture_output=True, text=True, timeout=3)
+        r = subprocess.run([*SAFE_GIT, "-C", cwd, *args], capture_output=True, text=True, timeout=3)
         return r.stdout.strip() if r.returncode == 0 else ""
     except (OSError, subprocess.SubprocessError):
         return ""
@@ -28,7 +37,7 @@ def find(root, names, depth=3):
     for d, dirs, files in os.walk(root):
         rel_depth = os.path.relpath(d, root).count(os.sep)
         dirs[:] = [x for x in dirs if x not in SKIP and not x.startswith(".")] if rel_depth < depth else []
-        found += [os.path.join(d, f) for f in files if f in names]
+        found += [os.path.join(d, f) for f in files if f in names and inside(root, os.path.join(d, f))]
     return found
 
 
@@ -96,7 +105,7 @@ def main():
     for p in find(root, {"package.json"})[:4]:
         stack += [f"{s} [{os.path.relpath(p, root)}]" for s in npm(p)]
     nvmrc = os.path.join(root, ".nvmrc")
-    if os.path.isfile(nvmrc):
+    if os.path.isfile(nvmrc) and inside(root, nvmrc):
         stack.append(f"Node {open(nvmrc).read().strip()} [.nvmrc]")
     if stack:
         lines.append("Stack: " + "; ".join(dict.fromkeys(stack)))

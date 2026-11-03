@@ -229,9 +229,19 @@ def leaks(text, hashes):
     return sorted(set(found))
 
 
+# The audited repository's git config is untrusted: command-line settings override it so that git never runs a command
+# from it (core.fsmonitor, hooks) and never writes to it (optional index locks).
+SAFE_GIT = ["git", "--no-optional-locks", "-c", "core.fsmonitor=false", "-c", "core.hooksPath=/dev/null"]
+
+
+def inside(root, path):
+    """True when path resolves inside root: a symbolic link must not pull in files from elsewhere (keys, configs)."""
+    return os.path.realpath(path).startswith(os.path.realpath(root).rstrip(os.sep) + os.sep)
+
+
 def git(root, *args):
     try:
-        r = subprocess.run(["git", "-C", root, *args], capture_output=True, text=True, timeout=20)
+        r = subprocess.run([*SAFE_GIT, "-C", root, *args], capture_output=True, text=True, timeout=20)
         return r.stdout.strip() if r.returncode == 0 else ""
     except (OSError, subprocess.SubprocessError):
         return ""
@@ -241,7 +251,10 @@ def walk(root):
     for d, dirs, files in os.walk(root):
         dirs[:] = sorted(x for x in dirs if x not in SKIP_DIRS and not (x.startswith(".") and x not in KEEP_DOT_DIRS))
         for f in sorted(files):
-            rel = os.path.relpath(os.path.join(d, f), root).replace(os.sep, "/")
+            full = os.path.join(d, f)
+            if os.path.islink(full) and not inside(root, full):
+                continue
+            rel = os.path.relpath(full, root).replace(os.sep, "/")
             if os.path.splitext(f)[1].lower() in TEXT_EXT or TEXT_NAMES.match(f):
                 yield rel
 
@@ -689,9 +702,9 @@ def signal_lines(inv, domains, per_signal=MAX_REFS):
                 continue
             total = sum(v for k, v in inv["signal_counts"].items() if k.split(":", 1)[1] == sid)
             refs = ", ".join(f"`{h['repo']}:{h['file']}:{h['line']}`" for h in hits[:per_signal])
-            block.append(f"- {names[sid]} [{sid}] ({total}): {refs}" + (" …" if total > per_signal else ""))
+            block.append(f"- {names[sid]} [{sid}] ({total}): {refs}" + (" ..." if total > per_signal else ""))
         missing = [names[sid] for sid in ids if not any(s["id"] == sid for s in inv["signals"])]
-        lines.append(f"### {dom} — {DOMAINS[dom]}")
+        lines.append(f"### {dom} - {DOMAINS[dom]}")
         lines += block or ["- no signal found"]
         if missing:
             lines.append(f"- not found anywhere: {', '.join(missing)}")
@@ -700,7 +713,7 @@ def signal_lines(inv, domains, per_signal=MAX_REFS):
 
 def render_inventory(inv, full=True):
     w = []
-    w.append("# Cloud migration audit — inventory (leads to verify, not verdicts)\n")
+    w.append("# Cloud migration audit - inventory (leads to verify, not verdicts)\n")
     w.append("| Repository | Roles | Files | Revision | Branch | Uncommitted changes |\n| --- | --- | --- | --- | --- | --- |")
     for r in inv["repos"]:
         w.append(f"| {r['label']} | {', '.join(r['roles'])} | {r['files']} | {r['head'] or 'not a git repo'} | {r['branch'] or '-'} | "
@@ -710,9 +723,9 @@ def render_inventory(inv, full=True):
             w.append(f"\n**{label} stack**: " + ", ".join(f"{a}" + (f" {b}" if b != "dependency" else "") for a, b, _ in st))
     w.append("\n## Cross-repository checks (facts side by side; confirm before concluding)")
     for c in inv["checks"]:
-        w.append(f"\n**{c['id']}** {c['title']} → {', '.join(c['controls'])}")
+        w.append(f"\n**{c['id']}** {c['title']} -> {', '.join(c['controls'])}")
         if c["hint"]:
-            w.append(f"- ⚠ hint: {c['hint']}")
+            w.append(f"- ! hint: {c['hint']}")
         w += [f"- {f}" for f in c["facts"]]
     df = inv["dockerfiles"]
     if df:

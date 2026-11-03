@@ -18,8 +18,12 @@ VERSIONED = re.compile(r"(^|/)V\d+(?:[._]\d+)*__[^/]+\.(sql|java|kt)$")
 PATH_KEYS = ("path", "file_path", "filePath", "file", "target_file", "filename")
 
 
+# The repository's git config is untrusted: never let it run a command (core.fsmonitor, hooks) or write a lock.
+SAFE_GIT = ["git", "--no-optional-locks", "-c", "core.fsmonitor=false", "-c", "core.hooksPath=/dev/null"]
+
+
 def git(cwd, *args):
-    r = subprocess.run(["git", "-C", cwd, *args], capture_output=True, text=True, timeout=5)
+    r = subprocess.run([*SAFE_GIT, "-C", cwd, *args], capture_output=True, text=True, timeout=5)
     return r.stdout.strip() if r.returncode == 0 else None
 
 
@@ -46,7 +50,7 @@ def main():
         return 0
     rel = os.path.relpath(os.path.realpath(os.path.join(cwd, path)), os.path.realpath(top)).replace(os.sep, "/")
     base = base_ref(top)
-    exists_on_base = subprocess.run(["git", "-C", top, "cat-file", "-e", f"{base}:{rel}"],
+    exists_on_base = subprocess.run([*SAFE_GIT, "-C", top, "cat-file", "-e", f"{base}:{rel}"],
                                     capture_output=True, timeout=5).returncode == 0
     if not exists_on_base:
         return 0

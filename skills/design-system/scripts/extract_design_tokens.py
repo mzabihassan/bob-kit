@@ -157,6 +157,8 @@ def iter_files(roots, excludes):
             dirs[:] = [x for x in dirs if x not in SKIP_DIRS]
             for f in files:
                 p = os.path.join(d, f)
+                if os.path.islink(p) and not os.path.realpath(p).startswith(os.path.realpath(root).rstrip(os.sep) + os.sep):
+                    continue  # a symbolic link must not pull in files from outside the scanned tree
                 ext = os.path.splitext(f)[1].lower()
                 if ext not in STYLE_EXT | MARKUP_EXT | SCRIPT_EXT:
                     continue
@@ -387,33 +389,33 @@ def main():
 
 def render_summary(r):
     c, cov = r["colors"], r["coverage"]
-    lines = [f"# Design system extraction — {r['files_scanned']} files",
+    lines = [f"# Design system extraction - {r['files_scanned']} files",
              f"Stack: {', '.join(f'{k} {v}' for k, v in r['stack'].items()) or 'not detected'}", "",
              "## Colours",
-             f"- {c['distinct']} distinct colour values → {c['clusters']} perceptual groups "
+             f"- {c['distinct']} distinct colour values -> {c['clusters']} perceptual groups "
              f"({c['near_duplicate_groups']} groups of near-duplicates to consolidate)"]
     for p in c["palette"][:12]:
         roles = ", ".join(f"{k} {v}" for k, v in sorted(p["roles"].items(), key=lambda x: -x[1]))
         dup = f", merges {len(p['variants'])} values" if len(p["variants"]) > 1 else ""
-        lines.append(f"- `{p['hex']}` ×{p['uses']} ({roles}{dup}) · contrast vs white {p['contrast_vs_white']}, "
-                     f"vs black {p['contrast_vs_black']}{' · token' if p['declared_as_token'] else ''}")
+        lines.append(f"- `{p['hex']}` x{p['uses']} ({roles}{dup}) - contrast vs white {p['contrast_vs_white']}, "
+                     f"vs black {p['contrast_vs_black']}{' - token' if p['declared_as_token'] else ''}")
     fails = [x for x in r["contrast_checks"] if not x["aa_normal"]]
-    lines += ["", "## Contrast (text colours on the most used backgrounds — verify in context)",
+    lines += ["", "## Contrast (text colours on the most used backgrounds - verify in context)",
               f"- {len(fails)} of {len(r['contrast_checks'])} candidate pairs below 4.5:1"]
     lines += [f"- `{x['text']}` on `{x['background']}`: {x['ratio']}:1" for x in fails[:8]]
     t = r["typography"]
     lines += ["", "## Typography",
-              f"- Families: {', '.join(f'{f} ×{n}' for f, n in t['families'][:5]) or 'none found'}",
+              f"- Families: {', '.join(f'{f} x{n}' for f, n in t['families'][:5]) or 'none found'}",
               f"- Font sizes: {t['sizes']['distinct']} distinct; most used "
-              f"{', '.join(f'{v:g}px ×{n}' for v, n in t['sizes']['most_used'][:8])}; ratio ≈ {t['size_ratio_estimate']}",
-              f"- Weights: {', '.join(f'{w} ×{n}' for w, n in t['weights'][:6])}",
+              f"{', '.join(f'{v:g}px x{n}' for v, n in t['sizes']['most_used'][:8])}; ratio ~ {t['size_ratio_estimate']}",
+              f"- Weights: {', '.join(f'{w} x{n}' for w, n in t['weights'][:6])}",
               "", "## Spacing, radius, elevation, layers",
               f"- Spacing: {r['spacing']['distinct']} distinct values, {r['spacing']['on_grid_pct']}% on a 4px grid; most used "
-              f"{', '.join(f'{v:g}px ×{n}' for v, n in r['spacing']['most_used'][:8])}",
-              f"- Radius: {r['radius']['distinct']} distinct; most used {', '.join(f'{v:g}px ×{n}' for v, n in r['radius']['most_used'][:6])}",
-              f"- Shadows: {r['shadows']['distinct']} distinct · z-index: {r['z_index']['distinct']} distinct values "
+              f"{', '.join(f'{v:g}px x{n}' for v, n in r['spacing']['most_used'][:8])}",
+              f"- Radius: {r['radius']['distinct']} distinct; most used {', '.join(f'{v:g}px x{n}' for v, n in r['radius']['most_used'][:6])}",
+              f"- Shadows: {r['shadows']['distinct']} distinct - z-index: {r['z_index']['distinct']} distinct values "
               f"({', '.join(v for v, _ in r['z_index']['values'][:8])})",
-              f"- Breakpoints: {', '.join(f'{b} ×{n}' for b, n in r['breakpoints'][:8]) or 'none found'}",
+              f"- Breakpoints: {', '.join(f'{b} x{n}' for b, n in r['breakpoints'][:8]) or 'none found'}",
               "", "## Tokens and coverage",
               f"- CSS custom properties: {r['tokens']['custom_properties_defined']} defined, {r['tokens']['custom_properties_used']} used; "
               f"{len(r['tokens']['defined_never_used'])} defined but never used, {len(r['tokens']['used_never_defined'])} used but not defined here"
@@ -422,8 +424,8 @@ def render_summary(r):
         lines.append(f"- {k}: {v['tokenized_pct']}% tokenized ({v['tokenized']} via tokens, {v['hardcoded']} hardcoded)")
     if r["tailwind"]["palette_classes"] or r["tailwind"]["arbitrary_values"]:
         lines += ["", "## Tailwind",
-                  f"- Palette classes: {', '.join(f'{k} ×{n}' for k, n in r['tailwind']['palette_classes'][:10])}",
-                  f"- Arbitrary values (bypass the theme): {', '.join(f'{k} ×{n}' for k, n in r['tailwind']['arbitrary_values'][:10])}"]
+                  f"- Palette classes: {', '.join(f'{k} x{n}' for k, n in r['tailwind']['palette_classes'][:10])}",
+                  f"- Arbitrary values (bypass the theme): {', '.join(f'{k} x{n}' for k, n in r['tailwind']['arbitrary_values'][:10])}"]
     return "\n".join(lines) + "\n"
 
 
@@ -433,20 +435,20 @@ def write_html(path, r):
         return f'<span class="b {"ok" if ratio >= 4.5 else "lg" if ratio >= 3 else "ko"}">{ratio}</span>'
     swatches = []
     for p in r["colors"]["palette"][:60]:
-        variants = "".join(f'<i title="{esc(v["hex"])} ×{v["count"]}" style="background:{esc(v["hex"])}"></i>'
+        variants = "".join(f'<i title="{esc(v["hex"])} x{v["count"]}" style="background:{esc(v["hex"])}"></i>'
                            for v in p["variants"][1:8])
         roles = ", ".join(f"{esc(k)} {v}" for k, v in sorted(p["roles"].items(), key=lambda x: -x[1]))
         swatches.append(
             f'<figure><div class="sw" style="background:{esc(p["hex"])}"><span style="color:#fff">Aa</span>'
-            f'<span style="color:#000">Aa</span></div><figcaption><b>{esc(p["hex"])}</b> ×{p["uses"]}'
+            f'<span style="color:#000">Aa</span></div><figcaption><b>{esc(p["hex"])}</b> x{p["uses"]}'
             f'<br><small>{roles}</small><br>white {badge(p["contrast_vs_white"])} black {badge(p["contrast_vs_black"])}'
             f'{"<br><small>declared token</small>" if p["declared_as_token"] else ""}'
             f'{f"<div class=v><small>merges</small>{variants}</div>" if variants else ""}</figcaption></figure>')
-    sizes = "".join(f'<div class="ts" style="font-size:{v:g}px">{v:g}px <small>×{n}</small> The quick brown fox</div>'
+    sizes = "".join(f'<div class="ts" style="font-size:{v:g}px">{v:g}px <small>x{n}</small> The quick brown fox</div>'
                     for v, n in sorted(r["typography"]["sizes"]["most_used"]))
-    spaces = "".join(f'<div class="sp"><span style="width:{min(v, 400):g}px"></span>{v:g}px <small>×{n}</small></div>'
+    spaces = "".join(f'<div class="sp"><span style="width:{min(v, 400):g}px"></span>{v:g}px <small>x{n}</small></div>'
                      for v, n in sorted(r["spacing"]["most_used"]))
-    radii = "".join(f'<div class="rd" style="border-radius:{v:g}px">{v:g}px<br><small>×{n}</small></div>'
+    radii = "".join(f'<div class="rd" style="border-radius:{v:g}px">{v:g}px<br><small>x{n}</small></div>'
                     for v, n in sorted(r["radius"]["most_used"]))
     doc = f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Design System Palette</title><link rel="icon" href="data:,"><style>
@@ -464,10 +466,10 @@ figcaption{{padding:8px 10px;font-size:12.5px;color:var(--muted)}} figcaption b{
 .sp{{display:flex;align-items:center;gap:10px;margin:4px 0;font-size:13px}} .sp span{{display:inline-block;height:12px;background:#4f6bed;border-radius:2px}}
 .rds{{display:flex;flex-wrap:wrap;gap:12px}} .rd{{width:76px;height:76px;border:2px solid #4f6bed;display:flex;align-items:center;justify-content:center;text-align:center;font-size:12px}}
 </style></head><body><main>
-<h1>Design system — extracted palette</h1>
-<p><small>{r['files_scanned']} files · {r['colors']['distinct']} colour values grouped into {r['colors']['clusters']} perceptual groups
+<h1>Design system - extracted palette</h1>
+<p><small>{r['files_scanned']} files - {r['colors']['distinct']} colour values grouped into {r['colors']['clusters']} perceptual groups
 ({r['colors']['near_duplicate_groups']} with near-duplicates). Badges: WCAG contrast of white or black text on the colour
-(green ≥ 4.5, amber ≥ 3, red &lt; 3).</small></p>
+(green >= 4.5, amber >= 3, red &lt; 3).</small></p>
 <h2>Palette</h2><div class="grid">{''.join(swatches)}</div>
 <h2>Type scale</h2>{sizes or '<p><small>No font sizes found.</small></p>'}
 <h2>Spacing</h2>{spaces or '<p><small>No spacing values found.</small></p>'}

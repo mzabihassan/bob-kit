@@ -23,3 +23,6 @@ jobs:
         run: python3 tools/test_hooks.py
       - name: Test the cloud migration audit engine
         run: python3 tools/test_cloud_audit.py
+      - name: Test the scripts and hooks against hostile repositories
+        run: python3 tools/test_security.py
+

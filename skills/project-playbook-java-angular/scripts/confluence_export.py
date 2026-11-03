@@ -57,6 +57,17 @@ SECRETS = [
                                           r"(?!<|\$\{|\{\{|\*\*\*|xxx|changeme|example|dummy|your|\.\.\.|…)[A-Za-z0-9+/=_\-!@#%^&]{12,}")),
 ]
 TODO = re.compile(r"\b(TODO|FIXME|XXX|lorem ipsum)\b", re.I)
+SAFE_SCHEMES = {"http", "https", "mailto"}
+
+
+def safe_href(url):
+    """The URL if a browser would treat it as a web, mail or relative link; None for javascript:, data:, file: and
+    other schemes, or control characters (pages may quote untrusted content and the preview runs in a browser)."""
+    value = html.unescape(url).strip()
+    if any(ord(c) < 32 or ord(c) == 127 for c in value):
+        return None
+    m = re.match(r"([a-zA-Z][a-zA-Z0-9+.-]*):", value)
+    return url if not m or m.group(1).lower() in SAFE_SCHEMES else None
 
 
 # ------------------------------------------------------------------ pages
@@ -119,7 +130,7 @@ class Renderer:
     def _code_span(self, code):
         link = self._source_link(code)
         # Confluence's code mark excludes every other mark: a linked file reference is pasted as a plain link.
-        return f'<a href="{html.escape(link)}">{html.escape(code)}</a>' if link else f"<code>{html.escape(code)}</code>"
+        return f'<a href="{html.escape(link)}">{html.escape(code)}</a>' if link and safe_href(link) else f"<code>{html.escape(code)}</code>"
 
     def _source_link(self, ref):
         if not self.sources or " " in ref or not re.search(r"[\w-]\.[A-Za-z]{1,10}(:\d+(-\d+)?)?$|/", ref):
@@ -141,7 +152,8 @@ class Renderer:
             return ""
         t = html.escape(t, quote=False)
         t = re.sub(r"\{\{status:(\w+):([^}]+)\}\}", self._status, t)
-        t = re.sub(r"!\[([^\]]*)\]\(([^)\s]+)\)", lambda m: f'<img src="{m.group(2)}" alt="{m.group(1)}"/>', t)
+        t = re.sub(r"!\[([^\]]*)\]\(([^)\s]+)\)",
+                   lambda m: f'<img src="{m.group(2)}" alt="{m.group(1)}"/>' if safe_href(m.group(2)) else m.group(1), t)
         t = re.sub(r"\[([^\]]+)\]\(([^)\s]+)(?:\s+&quot;[^&]*&quot;)?\)", self._link, t)
         t = re.sub(r"&lt;(https?://[^\s&]+)&gt;", r'<a href="\1">\1</a>', t)
         t = re.sub(r"\*\*(?=\S)(.+?)(?<=\S)\*\*", r"<strong>\1</strong>", t)
@@ -167,10 +179,12 @@ class Renderer:
             return text if text == html.escape(title, quote=False) else f"{text} (« {html.escape(title, quote=False)} »)"
         if not file and anchor:
             return text
-        if not re.match(r"^[a-z][a-z0-9+.-]*:", file) or file.split(":", 1)[0] in self.sources:  # a repository file
+        if not re.match(r"^[a-zA-Z][a-zA-Z0-9+.-]*:", file) or file.split(":", 1)[0] in self.sources:  # a repository file
             link = self._source_link(file)
-            return f'<a href="{html.escape(link)}">{text}</a>' if link else f"{text} (<code>{html.escape(file)}</code>)"
-        return f'<a href="{html.escape(target)}">{text}</a>'
+            if link and safe_href(link):
+                return f'<a href="{html.escape(link)}">{text}</a>'
+            return f"{text} (<code>{html.escape(file)}</code>)"
+        return f'<a href="{html.escape(target)}">{text}</a>' if safe_href(target) else text
 
     # ---- blocks
     def blocks(self, lines):
@@ -625,7 +639,9 @@ def main():
                     help="repository root to check that cited files exist (path, or prefix=path for several repositories)")
     ap.add_argument("--mermaid-js", default=MERMAID_JS, help="Mermaid script URL or path, for networks that block the CDN")
     a = ap.parse_args()
-    files = sorted(f for f in os.listdir(a.pages) if f.endswith(".md") and not f.startswith(("_", ".")) and f.lower() != "readme.md")
+    real_pages = os.path.realpath(a.pages).rstrip(os.sep) + os.sep
+    files = sorted(f for f in os.listdir(a.pages) if f.endswith(".md") and not f.startswith(("_", ".")) and f.lower() != "readme.md"
+                   and os.path.realpath(os.path.join(a.pages, f)).startswith(real_pages))  # no symbolic link out of the folder
     if not files:
         sys.exit(f"no Markdown pages in {a.pages}")
     pages = []
