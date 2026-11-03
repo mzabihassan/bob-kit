@@ -336,7 +336,8 @@ def results_platform():
 
 
 def run(*args, cwd=None):
-    return subprocess.run([sys.executable, AUDIT, *args], capture_output=True, text=True, cwd=cwd)
+    # -B: no __pycache__ left in the skill folder (it would be copied and flagged by the skill scanner).
+    return subprocess.run([sys.executable, "-B", AUDIT, *args], capture_output=True, text=True, cwd=cwd)
 
 
 def main():

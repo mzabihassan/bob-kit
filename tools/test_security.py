@@ -25,7 +25,8 @@ MARKER_TEXT = "outside-the-repo.intranet"  # appears only in files outside the a
 
 
 def run(args, **kw):
-    return subprocess.run([sys.executable, *args], capture_output=True, text=True, timeout=120, **kw)
+    # -B: no __pycache__ left in the skill folders (it would be copied and flagged by the skill scanner).
+    return subprocess.run([sys.executable, "-B", *args], capture_output=True, text=True, timeout=120, **kw)
 
 
 def git(repo, *args):
@@ -105,6 +106,7 @@ def main():
         extracted = open(os.path.join(css_out, "extracted.json")).read() if r.returncode == 0 else ""
         expect("#abcdef" in extracted and "#123456" not in extracted, "extract_design_tokens: symbolic link out of the tree not read")
 
+        sys.dont_write_bytecode = True  # same reason as -B above
         sys.path.insert(0, os.path.join(SK, "sonarqube-java-angular/scripts"))
         os.symlink(os.path.join(base, "outside", "pom.xml"), os.path.join(repo, "Leak.java"))
         with open(os.path.join(repo, "Own.java"), "w") as fh:
