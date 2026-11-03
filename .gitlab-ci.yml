@@ -1,0 +1,58 @@
+# bob-kit pipeline: validates every contribution (skills, modes, hooks, engines) and scans the skills.
+# Runs on merge requests, on the default branch and on tags; never twice for a branch with an open merge request.
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_TAG
+
+stages:
+  - test
+
+default:
+  interruptible: true
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+  PYTHONDONTWRITEBYTECODE: "1"  # no __pycache__ inside the skill folders
+
+# Same checks as the git pre-commit hook (tools/git-hooks/pre-commit), so a contribution that passes locally
+# passes here: kit structure (skills, modes, hooks), hook tests, cloud audit engine, security regression tests.
+# Python 3.9 is the oldest version the kit supports.
+validate:
+  stage: test
+  image: python:3.9-bookworm@sha256:ff12c273af1e1814efcd8dfdefe16a70a4d901afe94dce721ffed8a34176f285
+  needs: []
+  cache:
+    key: pip-validate
+    paths:
+      - .cache/pip
+  before_script:
+    - pip install pyyaml==6.0.2
+  script:
+    - sh tools/git-hooks/pre-commit
+
+# Static scan of every skill with NVIDIA SkillSpector v2.13.0 (no LLM, nothing leaves the runner). Fails on any
+# finding that tools/skillspector/<skill>.yaml does not justify.
+skillspector:
+  stage: test
+  image: python:3.12-bookworm@sha256:a5bab0ff300f91231c2e68bf73a8a8d60762ac39ce1c50eaf6803e4c38a9062b
+  needs: []
+  cache:
+    key: pip-skillspector
+    paths:
+      - .cache/pip
+  before_script:
+    - pip install "skillspector @ git+https://github.com/NVIDIA/SkillSpector@091a509b3d6ba8ff5be528966e1f43c2e68cf214"
+  script:
+    - python3 tools/scan_skills.py --out skillspector-reports
+  artifacts:
+    when: always
+    expose_as: SkillSpector reports
+    paths:
+      - skillspector-reports/
+    expire_in: 30 days
