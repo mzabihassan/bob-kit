@@ -25,6 +25,7 @@ skills/          # un dossier par skill, chacun avec un point d'entrée SKILL.md
   production-incident-investigation/
   project-playbook-java-angular/
   cloud-migration-audit-java-angular/
+  sql-to-jpa-entities/
 modes/           # modes Bob personnalisés (custom_modes.yaml)
 hooks/           # lifecycle hooks Bob (scripts Python + settings.example.json)
 tools/           # validation du kit, tests (hooks, audit cloud, sécurité), scan SkillSpector, hook git pre-commit
@@ -54,6 +55,7 @@ tools/           # validation du kit, tests (hooks, audit cloud, sécurité), sc
 | [production-incident-investigation](skills/production-incident-investigation/SKILL.md) | Accompagne l'astreinte pendant un incident : limiter l'impact, trouver ce qui a changé, tester les hypothèses à partir des métriques, des logs et des traces, proposer des mitigations avec leur risque, tenir la chronologie en UTC, rédiger les points d'avancement et le post-mortem. Lecture seule en production, sauf accord de l'incident commander. | Un service est en panne ou dégradé en production (erreurs, lenteurs, pods qui redémarrent, base saturée), ou pour rédiger le post-mortem après coup. |
 | [project-playbook-java-angular](skills/project-playbook-java-angular/SKILL.md) | Génère ou met à jour le playbook d'onboarding développeur d'un projet Spring Boot + Angular à partir de son code réel : démarrage rapide, architecture, API, conventions, CI/CD, exploitation, dépannage. Chaque fait cite son fichier, aucune valeur secrète n'apparaît, et un aperçu HTML se copie-colle dans Confluence Cloud. | Un nouveau développeur arrive, la documentation du projet manque ou est périmée, ou le code a changé depuis le dernier playbook. |
 | [cloud-migration-audit-java-angular](skills/cloud-migration-audit-java-angular/SKILL.md) | Audite ensemble les dépôts backend, frontend et CD/infrastructure d'une application Spring Boot + Angular migrée vers Kubernetes : 93 contrôles prouvés par `fichier:ligne`, risques propres à plusieurs pods (jobs planifiés dupliqués, sessions, état en mémoire, sondes, mémoire JVM, secrets…), décision GO / CONDITIONAL GO / NO-GO, plan d'action et tableau de bord HTML. Lecture seule. | Avant la mise en production d'une application migrée de serveurs on-premise vers Kubernetes (IBM Cloud, Helm, Argo CD, GitLab CI, JFrog), ou pour suivre l'avancement de la migration d'un audit à l'autre. |
+| [sql-to-jpa-entities](skills/sql-to-jpa-entities/SKILL.md) | Génère, à partir de scripts SQL Oracle ou PostgreSQL (fichiers ou migrations Flyway/Liquibase), la couche de données d'un projet Spring Boot (Java 21+, Hibernate 6 ou 7) : entités JPA fidèles au schéma (clés simples et composites, séquences et identity, relations `@ManyToOne`, `@OneToOne`, `@ManyToMany`, `@MapsId`, enums, contraintes, `@Version`), DTO records avec la Bean Validation déduite des contraintes, mappers MapStruct ou manuels et repositories Spring Data. Associations LAZY, cascade réservée aux compositions, `equals`/`hashCode` sur l'id. Signale les défauts du schéma (FK sans index, table sans clé primaire, `NUMBER` sans précision) avec leur correctif SQL, et ne remplace jamais un fichier existant modifié. | Vous démarrez un projet Spring Boot sur une base existante, vous reprenez un schéma legacy, ou une migration ajoute des tables à mapper. |
 
 ## Modes
 
@@ -301,6 +303,17 @@ Deliverables: the five reports (Markdown report, HTML dashboard, findings JSON, 
 Language: English.
 ```
 
+**[sql-to-jpa-entities](skills/sql-to-jpa-entities/SKILL.md)** : la couche JPA d'un schéma existant. Mode : **Agent** (le skill exécute son moteur et compile le projet).
+```text
+Task: Generate the JPA entities, DTO records, MapStruct mappers and Spring Data repositories for the payments schema.
+Context: Spring Boot 3.5 project in this workspace, Java 21, Oracle 19c. The schema is defined by the Flyway migrations; the project already uses MapStruct and does not use Lombok.
+Inputs: the migrations folder src/main/resources/db/migration
+Requirements: base package com.acme.payments; Oracle DATE columns hold dates only, except the columns ending in _at, which hold a time; no inverse collections other than the compositions.
+Constraints: do not modify the migrations or any existing class; run nothing against a database; do not commit.
+Deliverables: the sources under src/main/java, a successful ./mvnw -q -DskipTests compile, and the mapping report with the schema warnings and their SQL fixes.
+Language: code in English; report in French.
+```
+
 ### Économiser des bobcoins
 
 Bob renvoie à chaque requête tout son contexte (prompt système, définitions des outils, skills, historique) et facture le contexte complet à chaque tour. Ce qui coûte, c'est donc la taille du contexte et le nombre de tours. Les skills bob-kit sont écrits pour rester courts, lire le code de façon ciblée et confier les lectures larges à des sous-agents (`spawn_subagent`), dont seul le résultat revient dans la tâche. De votre côté, d'après les [recommandations d'IBM](https://bob.ibm.com/docs/ide/core-concepts/context-window-management) :
@@ -350,7 +363,7 @@ python3 tools/scan_skills.py --out skillspector-reports
 
 Le script scanne chaque skill séparément avec sa baseline `tools/skillspector/<skill>.yaml` (SkillSpector n'accepte pas de baseline dans un scan récursif), affiche le score, les constats actifs, les constats justifiés et la couverture de chaque skill, et échoue sur tout constat qu'aucune baseline ne justifie. Il signale aussi les règles qui ne correspondent plus à rien, pour qu'une baseline ne masque jamais plus que nécessaire.
 
-Résultats avec SkillSpector v2.13.0 en `--no-llm` sur les 19 skills :
+Résultats avec SkillSpector v2.13.0 en `--no-llm` sur les 19 skills du kit au moment du durcissement :
 
 | | Avant le durcissement | Après le durcissement | Avec les baselines |
 | --- | --- | --- | --- |
