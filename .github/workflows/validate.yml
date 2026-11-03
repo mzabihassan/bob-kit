@@ -21,3 +21,5 @@ jobs:
         run: python3 tools/validate_kit.py
       - name: Test hooks
         run: python3 tools/test_hooks.py
+      - name: Test the cloud migration audit engine
+        run: python3 tools/test_cloud_audit.py
