@@ -88,6 +88,105 @@ cp -R skills/angular2-developer /chemin/vers/le/projet/.bob/skills/
 
 Certains skills ne sont proposés que dans un mode, grâce au champ `groups` de leur frontmatter : Bob n'affiche le skill (dans les skills disponibles et dans les commandes `/`) que si le mode actif porte ce slug ou l'un de ces groupes d'outils. C'est le cas de `security-findings-remediation` (`groups: [security-remediator]`) : installez aussi le mode [security-remediator](modes/README.md), sinon le skill n'apparaît dans aucun mode. Pour le rendre disponible partout, supprimez la ligne `groups`. Le champ `modes`, parfois proposé, est ignoré par Bob (vérifié avec Bob Shell 2.0.6).
 
+### Exemples de prompts
+
+Écrivez votre demande normalement : Bob choisit le skill d'après sa description. Un bon prompt nomme la cible (dossiers, fichiers, commit, MR, rapport), la langue des livrables et les limites (lecture seule, pas de commit, pas de publication) : chaque question que Bob doit poser coûte un tour. Les exemples ci-dessous sont en anglais et Bob répond dans la langue du prompt ; remplacez les noms (`payments-api`, `payments-ui`, `!482`…) par les vôtres.
+
+**[angular2-developer](skills/angular2-developer/SKILL.md)** : une fonctionnalité dans une application existante, dans le style du projet.
+```text
+Add a paginated, sortable transactions table to the account detail page (src/app/accounts/account-detail), fed by GET /api/accounts/{id}/transactions. Follow the project's existing components, state management and test style, add unit tests and run them. Do not commit.
+```
+
+**[react-developer](skills/react-developer/SKILL.md)** : une montée de version de React.
+```text
+Upgrade this app from React 18 to React 19: run the official codemods, fix the type errors and the removed APIs, then run the build and the tests. List what changed and what still needs a manual check. Do not commit.
+```
+
+**[spring-boot-developer](skills/spring-boot-developer/SKILL.md)** : un bug sur un flux financier, reproduit avant d'être corrigé.
+```text
+Bug PAY-1432: POST /api/transfers sometimes debits the account twice when the client retries after a timeout. Reproduce it with a test, fix it with the smallest safe change, run the module's tests and give me the technical report. Do not commit.
+```
+
+**[sonarqube-java-angular](skills/sonarqube-java-angular/SKILL.md)** : un Quality Gate en échec sur la couverture.
+```text
+The SonarQube Quality Gate fails on new code coverage (62% instead of 80%) in payments-api and payments-ui. Use the existing reports target/site/jacoco/jacoco.xml and coverage/lcov.info, rank the quickest real coverage gains, write the tests for the top five and report the coverage before and after.
+```
+
+**[security-findings-remediation](skills/security-findings-remediation/SKILL.md)** : une release bloquée par Nexus IQ. À lancer dans le mode [security-remediator](modes/README.md), le seul où ce skill est proposé.
+```text
+The release is blocked by Nexus IQ: the policy report is in reports/nexus-iq-payments-api.json. Triage the violations, fix the reachable ones with the smallest dependency upgrades (ask me before any major upgrade), draft waiver justifications for the rest and tell me what to rescan.
+```
+
+**[gitlab-ci-engineer](skills/gitlab-ci-engineer/SKILL.md)** : un pipeline en échec.
+```text
+Pipeline https://gitlab.example.com/pay/payments-api/-/pipelines/48211 fails in the integration-test job since this morning. Find the first real error in the job log, explain the cause and propose the minimal fix. Do not modify the central templates and do not skip any security job.
+```
+
+**[sql-database-engineer](skills/sql-database-engineer/SKILL.md)** : une requête lente en production.
+```text
+The account statement query takes 12 s in production on PostgreSQL 15: the SQL is in TransactionRepository.findStatement and the EXPLAIN (ANALYZE, BUFFERS) output is in docs/perf/statement-plan.txt. Explain the plan, propose the index or the rewrite, and write the Flyway migration that creates the index without blocking writes.
+```
+
+**[argocd-gitops](skills/argocd-gitops/SKILL.md)** : une application Argo CD dégradée après une promotion.
+```text
+The Argo CD application payments-api-prod has been OutOfSync and Degraded since the last promotion. Find the cause with read-only argocd and kubectl commands, then propose the fix as a change in the GitOps repository. No change on the cluster.
+```
+
+**[ibm-cloud-platform](skills/ibm-cloud-platform/SKILL.md)** : sortir un secret de Git vers Secrets Manager.
+```text
+Our Spring Boot app on Red Hat OpenShift on IBM Cloud reads its database password from a Kubernetes Secret committed in Git. Propose how to move it to Secrets Manager (IAM, service ID or trusted profile, private endpoint) and write the Terraform changes in infra/ibm. Read-only on the account: do not apply anything.
+```
+
+**[merge-request-review](skills/merge-request-review/SKILL.md)** : la revue d'une MR. Sans cible, le skill revoit les changements locaux, puis la branche courante.
+```text
+Review !482 in payments-api. Focus on data integrity, security and API backward compatibility, and check suspected bugs with a test in a separate worktree. Do not post anything on GitLab.
+```
+
+**[criticize-me](skills/criticize-me/SKILL.md)** : l'autocritique d'un commit avant de le montrer. Le commit est obligatoire.
+```text
+Criticize commit 3f9c2ab. I want every real weakness before my team sees it.
+```
+
+**[defend-me](skills/defend-me/SKILL.md)** : préparer la défense d'un commit avant une revue ou un CAB. Le commit est obligatoire.
+```text
+Defend HEAD for tomorrow's architecture review: the reviewers will ask why I added a retry queue instead of reusing the existing scheduler. Prepare the rebuttals, the quick fixes worth doing before the review and the MR description.
+```
+
+**[confluence-documentation](skills/confluence-documentation/SKILL.md)** : un runbook écrit à partir du code, en brouillon.
+```text
+Write the runbook of the payments-api monthly statement batch (MonthlyStatementJob, its Helm values and alerts) for the PAY space, under Operations > Runbooks, in English. Look for an existing page first. Draft only: do not publish.
+```
+
+**[design-system](skills/design-system/SKILL.md)** : l'audit du design system réel d'un frontend.
+```text
+Extract and audit the real design system of the Angular portal (sources in apps/portal/src and libs/ui). I want the palette with its near-duplicates, the WCAG contrast failures and a prioritised plan to move to design tokens. Write the deliverables in docs/design-system, in French.
+```
+
+**[web-accessibility-eu-fr](skills/web-accessibility-eu-fr/SKILL.md)** : l'audit RGAA d'un parcours.
+```text
+Audit the accessibility of the account opening journey (/open-account, four steps, desktop and mobile) against RGAA 4.1.2. Use axe-core through the project's Playwright tests if available, then the manual checks. Read-only: write the report in docs/a11y, in French.
+```
+
+**[release-change-management](skills/release-change-management/SKILL.md)** : les documents d'une release, à partir des vrais changements.
+```text
+Prepare release 2.4.0 of payments-api from tag v2.3.0 to main: technical changelog, business release notes in French, version proposal, and the ServiceNow change request with risk, rollback plan and deployment runbook for the Saturday 22:00 window. Do not create the tag.
+```
+
+**[production-incident-investigation](skills/production-incident-investigation/SKILL.md)** : un incident de production en cours.
+```text
+Incident in progress: since 14:05 UTC about 30% of payment requests fail with HTTP 504 on payments-api in production. I am the incident commander. Help me find what changed and test hypotheses with read-only commands, propose mitigations with their risk, and keep a UTC timeline.
+```
+
+**[project-playbook-java-angular](skills/project-playbook-java-angular/SKILL.md)** : le playbook d'onboarding de deux dépôts séparés, à coller dans Confluence. Ouvrez Bob dans le dossier qui contient les deux dépôts.
+```text
+Generate the Confluence developer onboarding playbook for the payments application: backend ./payments-api (Spring Boot) and frontend ./payments-ui (Angular), two separate repositories. Language: English. Output folder: payments-api/docs/playbook. Do not run builds or tests, do not publish to Confluence, do not commit.
+```
+
+**[cloud-migration-audit-java-angular](skills/cloud-migration-audit-java-angular/SKILL.md)** : l'audit de migration vers Kubernetes, avec la décision GO / CONDITIONAL GO / NO-GO. Ouvrez Bob dans le dossier qui contient les trois dépôts.
+```text
+Audit the cloud migration of the payments application: backend ./payments-api, frontend ./payments-ui, CD/infrastructure ./payments-deploy (Helm, Argo CD, GitLab CI). Repositories only, no live access. Write the reports in English to ./cloud-migration-audit.
+```
+
 ### Économiser des bobcoins
 
 Bob renvoie à chaque requête tout son contexte (prompt système, définitions des outils, skills, historique) et facture le contexte complet à chaque tour. Ce qui coûte, c'est donc la taille du contexte et le nombre de tours. Les skills bob-kit sont écrits pour rester courts, lire le code de façon ciblée et confier les lectures larges à des sous-agents (`spawn_subagent`), dont seul le résultat revient dans la tâche. De votre côté, d'après les [recommandations d'IBM](https://bob.ibm.com/docs/ide/core-concepts/context-window-management) :
